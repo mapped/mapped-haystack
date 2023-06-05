@@ -1,0 +1,3919 @@
+"The directive is responsible for authorization check."
+directive @auth(
+    "Permissions which are required for field access."
+    permissions: [String!]
+  ) on FIELD_DEFINITION
+
+"Marks the field, argument, input field or enum value as deprecated"
+directive @deprecated(
+    "The reason for the deprecation"
+    reason: String = "No longer supported"
+  ) on FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM_VALUE | INPUT_FIELD_DEFINITION
+
+"The directive allows return the nested field (described in the path) of the output type"
+directive @extract(path: String!) on FIELD_DEFINITION
+
+"The directive marks a field for graph database handling logic"
+directive @graph(
+    "The direction of graph query traverse"
+    direction: GraphEdgeDirection!,
+    "The name of traverse edge"
+    edgeName: String!
+  ) on FIELD_DEFINITION
+
+"The GRPC directive stores information about the GRPC call. If the field is marked with a directive, then the result will be obtained from the result of the GRPC call."
+directive @grpc(
+    "The parameter determines a list of authorization modes that are supportable by the method"
+    authMods: [AuthMode],
+    "The field is determining if input fields should be flattened to the grpc request object"
+    flattenRequest: Boolean = false,
+    "The target GRPC method to be called as a result of fetching a field. Pattern is <proto_service_package>.<service_name>/<service_method>"
+    invoke: String!,
+    "GRPC request options"
+    requestOptions: GRPCRequestOptions,
+    "The name of the field to be retrieved from the GRPC response while fetching the GraphQL field"
+    returnField: String,
+    "If true then return lookup key in case of empty response or failure"
+    returnLookupKeyOnFailure: Boolean = false
+  ) on FIELD_DEFINITION
+
+"Directs the executor to include this field or fragment only when the `if` argument is true"
+directive @include(
+    "Included when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"The directive creates Live Query based on the field, its subfields and variables."
+directive @live(name: String) on QUERY
+
+"The directive allows making a mapping between the source field and end-user representation"
+directive @mapFromSource(name: String!) on FIELD_DEFINITION
+
+"The directive is responsible for mapping the relationship between the parent type and the field to which the directive is assigned."
+directive @relationMapping(mappings: [NodesMapping]) on FIELD_DEFINITION
+
+"Directs the executor to skip this field or fragment when the `if` argument is true."
+directive @skip(
+    "Skipped when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Exposes a URL that specifies the behaviour of this scalar."
+directive @specifiedBy(
+    "The URL that specifies the behaviour of this scalar."
+    url: String!
+  ) on SCALAR
+
+interface Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+
+interface BACnetObjectIdModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface BACnetVendorIdModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface EmailAddressIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface EmailIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface Event {
+  endTime: DateTime
+  id: String!
+  name: String!
+  startTime: DateTime!
+}
+
+interface ExternalIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface FloorLevelIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface NameIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+"Contains all the details of any places associated with a particular thing, such as a space or a floor."
+interface Place {
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent]
+  connectors(filter: ConnectorFilterInput): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  description: String
+  exactType: String
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of the place."
+  id: String!
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  "The name of the place."
+  name: String
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"])
+  "Contains the complete list of things associated with the place."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  type: [String]
+}
+
+interface PostalAddressIdentityModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface SpaceCodeModel implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+interface ThingContainer {
+  things(filter: ThingFilter): [Thing] @auth(permissions : ["Thing.Read.All"])
+}
+
+union BuildingIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union CalendarInvitee = Person | Space
+
+union FeedsUnion = Building | Floor | GenericPlace | Site | Space | Thing | Zone
+
+union FloorIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union IsPointOfUnion = Building | Floor | GenericPlace | Site | Space | Thing | Zone
+
+union PersonIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union PointIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union SiteIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union SpaceIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union ThingFeed = Building | Floor | Site | Space | Thing | Zone
+
+union ThingIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+union ZoneIdentityUnion = BACnetObjectId | BACnetVendorId | EmailAddressIdentity | EmailIdentity | ExternalIdentity | FloorLevelIdentity | GenericIdentity | NameIdentity | PostalAddressIdentity | SpaceCode
+
+type APIKey {
+  apiKey: String
+  keyName: String
+  passedAs: String
+}
+
+type Address {
+  countryName: String
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String!
+  locality: String
+  postalCode: String
+  region: String
+  streetAddress: String
+}
+
+type AddressMutation {
+  countryName: String
+  id: String
+  locality: String
+  postalCode: String
+  region: String
+  streetAddress: String
+  type: [String]
+}
+
+type BACnetObjectId implements BACnetObjectIdModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type BACnetVendorId implements BACnetVendorIdModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type BasicAuth {
+  password: String
+  username: String
+}
+
+type BillingCalculatedProductBundleResponse {
+  calculation: BillingCalculationResponse
+  code: Int
+  productBundle: ProductBundleResponse
+  productSlug: String
+  statusMessage: String
+}
+
+type BillingCalculationResponse {
+  fixedPrice: Long
+  itemSlug: String
+  overagePrice: Long
+  productPriceItem: ProductPriceItemResponse
+  quantity: Long
+  unitPrice: Long
+}
+
+type BillingProductBundleSubscriptionResponse {
+  productBundle: BillingCalculatedProductBundleResponse
+  subscriptionId: String
+}
+
+"Contains all the details of a building."
+type Building implements Place & ThingContainer {
+  "The address of a building, contains fields that support international addresses."
+  address: Address
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  "Any connectors configured for a building will be listed here."
+  connectors(
+    "This filter is most often used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  "This timestamp represents the date the building was created."
+  dateCreated: DateTime
+  "This timestamp represents that date the building was last updated."
+  dateUpdated: DateTime
+  "The description of a building; often left blank, especially if the building name is already descriptive."
+  description: String
+  "The exactType is the most granular Brick Schema Location type defined for this building."
+  exactType: String
+  "All the floors present in a building will be listed here."
+  floors(
+    "This filter is most often used to restrict results to a specific floor or floors."
+    filter: FloorFilter
+  ): [Floor] @auth(permissions : ["Place.Read.All"])
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  "In some limited scenarios, a point may be associated with a building as opposed to a thing, like a building electrical meter. Those details will be provided here."
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of a building."
+  id: String!
+  identities: [BuildingIdentityUnion]
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  "Superset of anything that could be in a building - a thing, a person, a meeting (people and meetings currently in development)."
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  "This contains the next level up in the place hierarchy; for a building, this will contain site information."
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  "The name of a building; often just the street address."
+  name: String
+  "Any of the points available inside a building will be listed here."
+  points(
+    "This filter is most often used to restrict results to a specific point or points."
+    filter: PointFilter
+  ): [Point] @auth(permissions : ["Thing.Read.All"])
+  "The site associated with a building."
+  sites(
+    "This filter is most often used to restrict results to a specific site or sites."
+    filter: SiteFilter
+  ): [Site] @auth(permissions : ["Place.Read.All"])
+  "All the things associated with a building, or any floor or space in the building, will show here."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  "Type includes all possible hierarchal types for the building, such as \"Place\" and \"Building\"."
+  type: [String]
+}
+
+type BuildingCreateResponse {
+  building: BuildingMutation
+}
+
+type BuildingDeleteResponse {
+  _: String
+}
+
+type BuildingMutation {
+  address: AddressMutation
+  geoshape: GeoJSON @deprecated(reason : "No longer supported")
+  id: String
+  name: String
+  siteId: String
+}
+
+type BuildingUpdateResponse {
+  building: BuildingMutation
+}
+
+type BusinessDoesOrgExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgFeatureExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgHaveAccessToPlanResponse {
+  hasAccess: Boolean
+}
+
+type BusinessDoesOrgPermissionExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgPlanExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgPlanGroupExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgPlanGroupPlanExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesOrgUserExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesPlanFeatureExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesPlanProviderExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesPlanProviderPlanExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesRoleGroupExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesRoleGroupPermissionExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesRoleGroupRoleExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesRoleGroupUserExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesRolePermissionExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesUserExistResponse {
+  exists: Boolean
+}
+
+type BusinessDoesUserPermissionExistResponse {
+  exists: Boolean
+}
+
+type CalendarEvent implements Event {
+  endTime: DateTime
+  hasInvitations: [CalendarInvitation]
+  hasInvitees: [CalendarInvitee]
+  id: String!
+  name: String!
+  startTime: DateTime!
+}
+
+type CalendarInvitation {
+  email: EmailAddress
+  event: CalendarEvent
+  hasInvitee: CalendarInvitee
+  response: CalendarInvitationResponse
+}
+
+"Contains the details about a Connector."
+type Connector {
+  "Any settings required in order to create a Connector will be provided here."
+  config: JSONSchema
+  "Random string that identifies the current Connector configuration; if you need to update the configuration, you will need to include the current configHash value in the mutation request."
+  configHash: String
+  "The type/category/vendor of a Connector, such as \"Weather\" or \"Butlr\"."
+  connectorType: ConnectorType @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.types.ConnectorTypesService/Get", returnField : "connectorType", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectorTypeId", childField : "id"}])
+  "The unique id of the connector type."
+  connectorTypeId: String
+  contributions: [ConnectorContribution]
+  "Timestamp for the Connector's creation."
+  created: DateTime
+  direction: ConnectorTypeConnectorDirection
+  "The unique id of a Connector."
+  id: String
+  lastSeen: DateTime
+  lastUpdatedBy: String
+  "The name of a Connector you provided when setting it up for your org."
+  name: String
+  "Contains the details about the organization associated with this Connector."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "id"}])
+  "Lists all the points returned by the Connector."
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"]) @relationMapping(mappings : [{parentField : "id", childField : "connectedDataSourceId"}])
+  "Lists the state of a Connector, such as ACTIVE or STOPPED."
+  state: ConnectorState
+  "Currently provides additional information about a Connector in an ERROR_GENERAL state."
+  stateDetails: String
+  "Lists all the things returned by the Connector."
+  things(filter: ThingFilter): [Thing] @auth(permissions : ["Thing.Read.All"]) @relationMapping(mappings : [{parentField : "id", childField : "connectedDataSourceId"}])
+  "Timestamp when a connector was last updated."
+  updated: DateTime
+  userId: String
+  "This is an internal-only field; the value(s) included in this field may be requested by support for troubleshooting purposes, but otherwise holds no value for external developers."
+  workflowId: String
+}
+
+type ConnectorAuth {
+  created: DateTime
+  id: String
+  lastAccessed: DateTime
+  updated: DateTime
+}
+
+type ConnectorAuthCreateResponse {
+  connectorAuth: ConnectorAuth
+}
+
+type ConnectorAuthDeleteResponse {
+  _: String
+}
+
+type ConnectorAuthUpdateResponse {
+  connectorAuth: ConnectorAuth
+}
+
+type ConnectorContribution {
+  count: Long
+  systemType: String
+}
+
+type ConnectorCreateResponse {
+  connector: Connector
+}
+
+type ConnectorDeleteResponse {
+  _: String
+}
+
+type ConnectorRequest {
+  connectorTypeId: String
+  id: String
+}
+
+type ConnectorRequestCreateResponse {
+  request: ConnectorRequest
+}
+
+type ConnectorRestartResponse {
+  _: String
+}
+
+type ConnectorStartResponse {
+  _: String
+}
+
+type ConnectorStopResponse {
+  _: String
+}
+
+"Contains Connector type details."
+type ConnectorType {
+  "This is the JSON schema used to define how the config for a Connector needs to look."
+  configSchema: JSONSchema
+  "The description of the Connector type."
+  description: String
+  "Reflects whether the Connector is SOURCE (ingress, data from the vendor to your org) or DESTINATION (egress, data from your org to an external destination like a data lake)."
+  direction: ConnectorTypeConnectorDirection
+  "The unique ID of the Connector type."
+  id: String
+  "The uneditable, assigned name of the Connector type; this is not the same as the Connector name defined by you when adding it to your org.."
+  name: String
+  "This is an internal-only field; the value(s) included in this field may be requested by support for troubleshooting purposes, but otherwise holds no value for external developers."
+  taskQueue: String
+  "This identifies the version of the Connector setup in your org; Connectors may have multiple versions available."
+  version: String
+}
+
+type ConnectorTypeListAvailableResponse {
+  available: [ConnectorType]
+  connectorTypes: [ConnectorType] @deprecated(reason : "No longer supported")
+  requested: [ConnectorType]
+  uponRequest: [ConnectorType]
+}
+
+type ConnectorUpdateResponse {
+  connector: Connector
+}
+
+type ConnectorUpsertConfigResponse {
+  config: JSONSchema
+  configHash: String
+  configUnchanged: Boolean
+  id: String
+}
+
+type ContributionRequest {
+  id: String
+  properties: ContributionRequestPropertyValues
+  target: ContributionRequestTargetEntity
+}
+
+type ContributionRequestCreateResponse {
+  contributionRequest: ContributionRequest
+}
+
+type ContributionRequestPropertyValues {
+  additionalName: String
+  address: String
+  attachment: [String]
+  callInfo: String
+  countryName: String
+  description: String
+  deviceModelId: String
+  elevation: Float
+  endTime: DateTime
+  exactType: String
+  familyName: String
+  firmwareVersion: String
+  geoshape: GeoJSON
+  givenName: String
+  hostname: String
+  iCalUid: String
+  image: String
+  ipv4Address: [String]
+  ipv6Address: [String]
+  level: Int
+  locality: String
+  macAddress: String
+  maxLimit: Float
+  maxOccupancy: Int
+  minLimit: Float
+  name: String
+  postalCode: String
+  region: String
+  response: String
+  seeAlso: String
+  serialNumber: String
+  stateTexts: [String]
+  streetAddress: String
+  systemType: [String]
+  type: [String]
+  unit: String
+  valueType: String
+}
+
+type ContributionRequestTargetEntity {
+  id: String
+}
+
+type DeviceManufacturer {
+  description: String
+  id: String
+  logoUrl: String
+  name: String
+}
+
+type DeviceModel {
+  description: String
+  id: String
+  imageUrl: String
+  manufacturer: DeviceManufacturer @auth(permissions : ["DeviceManufacturer.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.devicelibrary.manufacturers.ManufacturersService/Get", returnField : "manufacturer", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "manufacturerId", childField : "id"}])
+  manufacturerId: String
+  name: String
+  seeAlsoUrls: [String]
+}
+
+type Duration {
+  nanos: Int
+  seconds: Long
+}
+
+type EmailAddress {
+  address: String @mapFromSource(name : "value")
+}
+
+type EmailAddressIdentity implements EmailAddressIdentityModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type EmailIdentity implements EmailIdentityModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type ExternalIdentity implements ExternalIdentityModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+"Contains the details about the floor."
+type Floor implements Place & ThingContainer {
+  "Contains the details of the building where the floor is present."
+  building: Building! @auth(permissions : ["Place.Read.All"])
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  "Any connectors configured for the floor will be listed here."
+  connectors(
+    "This is the filter for the connectors field, most often used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  "This timestamp represents the date the floor was created."
+  dateCreated: DateTime
+  "This timestamp represents that date the floor was last updated."
+  dateUpdated: DateTime
+  "The description of the floor; often left blank, especially if the floor name is already descriptive."
+  description: String
+  exactType: String
+  "The geographic shape of the floor, represented by latitude/longitude coordinate pairs."
+  geoshape: GeoJSON
+  "Lists the spaces on the floor - spaces are \"part of\" a floor."
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of the floor."
+  id: String!
+  identities: [FloorIdentityUnion]
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  "This contains the next level up in the place hierarchy; for a floor, this will contain building information."
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  "This is the floor level represented numerically. Starting at 0 for ground floor, with basement levels below ground floor identified as negative numbers."
+  level: Int
+  "The name of the floor, typically just a number or \"floor1\", \"floor2\"."
+  name: String
+  "Any of the points available on the floor will be listed here."
+  points(
+    "This filter is most often used to restrict results to a specific point or points."
+    filter: PointFilter
+  ): [Point] @auth(permissions : ["Thing.Read.All"])
+  "All the spaces present on the floor will be listed here."
+  spaces(
+    childDepth: Int,
+    "This filter is most often used to restrict results to a specific space or spaces."
+    filter: SpaceFilter
+  ): [Space] @auth(permissions : ["Place.Read.All"])
+  "All the things associated with the floor, or any spaces on the floor, will show here."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  "Type includes all possible hierarchal types for the building, such as \"Place\" and \"Floor\"."
+  type: [String]
+  "Currently in development; will show all the zones associated with the floor."
+  zones(
+    "This filter is most often used to restrict results to a specific zone or zones."
+    filter: ZoneFilter
+  ): [Zone] @auth(permissions : ["Place.Read.All"])
+}
+
+type FloorCreateResponse {
+  floor: FloorMutation
+}
+
+type FloorDeleteResponse {
+  _: String
+}
+
+type FloorLevelIdentity implements FloorLevelIdentityModel & Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type FloorMutation {
+  buildingId: String
+  geoshape: GeoJSON
+  id: String
+  level: Int
+  name: String
+  type: [String]
+}
+
+type FloorUpdateResponse {
+  floor: FloorMutation
+}
+
+"Contains the details about the gateway."
+type Gateway {
+  "If the gateway is in an active state, this will contain the last seen time value."
+  active: GatewayActiveDetails
+  "Contains the gateway place assignment details, including place IDs and system types."
+  assignment: GatewayAssignmentDetails
+  "This contains the timestamp for the gateway's first boot."
+  firstBoot: GatewayFirstBootDetails
+  "The unique ID of the gateway."
+  gatewayId: String
+  "Contains the details about the organization associated with this gateway."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "id"}])
+  "Contains the timestamp for the gateway's initial provisioning to the organization."
+  provisioning: GatewayProvisioningDetails
+  "Contains gateway registration details, including serial number and IMEI information."
+  registration: GatewayRegistrationDetails
+  "If the gateway needs to be returned, this will contain details like the RMA reason along with any explanatory notes."
+  rma: GatewayRMADetails
+  "If the gateway is currently in a SHIPPED state, details about the shipment will show here, including carrier and tracking number."
+  shipping: GatewayShippingDetails
+  "The current state of the gateway - many states are transitory, like FIRST_BOOT; the more common states will be ACTIVE, ASSIGNED, PROVISIONING and SHIPPED as those exist for longer windows."
+  state: GatewayLifecycleState
+  "Timestamp for the start of the current state."
+  stateTime: DateTime
+  "If the gateway was suspended, this will contain details like the suspension reason along with any explanatory notes."
+  suspension: GatewaySuspensionDetails
+  "If the gateway was terminated, this will contain details like the suspension reason along with any explanatory notes. This differs from suspenson as the gateway cannot be returned to active once terminated."
+  termination: GatewayTerminationDetails
+}
+
+type GatewayActiveDetails {
+  lastSeenTime: DateTime
+}
+
+type GatewayAssignResponse {
+  _: String
+}
+
+type GatewayAssignmentDetails {
+  assignmentTime: DateTime
+  physicalPlaceId: String
+  preciseGeoLocation: GeoJSON
+  servesPlaceIds: [String]
+  servesSystemTypes: [SystemTypeKey]
+  uniqueName: String
+}
+
+type GatewayFirstBootDetails {
+  bootTime: DateTime
+}
+
+type GatewayGenerateContainerSIDsResponse {
+  availableCertificateCn: String
+  signingCertificateCn: String
+}
+
+type GatewayNote {
+  note: String
+  time: DateTime
+}
+
+type GatewayProvisioningDetails {
+  provisionTime: DateTime
+}
+
+type GatewayRMADetails {
+  notesCustomer: [GatewayNote]
+  reason: GatewayRMAReason
+  rmaTime: DateTime
+}
+
+type GatewayRegisterContainerResponse {
+  deviceId: String
+  gatewayId: String
+}
+
+type GatewayRegistrationDetails {
+  imei: String
+  lanMac: String
+  mappedModel: GatewayModel
+  serialNumber: String
+  sim: GatewaySIMInfo
+}
+
+type GatewaySIMCertificate {
+  id: String
+  pem: String
+  subjectKeyId: String
+}
+
+type GatewaySIMInfo {
+  availableCertificate: GatewaySIMCertificate
+  iccid: String
+  signingCertificate: GatewaySIMCertificate
+  simType: GatewaySIMType
+}
+
+type GatewayShippingDetails {
+  courier: GatewayCourier
+  shipTime: DateTime
+  status: GatewayShippingStatus
+  statusTime: DateTime
+  trackingNumber: String
+}
+
+type GatewaySuspendResponse {
+  _: String
+}
+
+type GatewaySuspensionDetails {
+  notesCustomer: [GatewayNote]
+  reason: GatewaySuspensionReason
+  suspensionTime: DateTime
+}
+
+type GatewayTerminationDetails {
+  notesCustomer: [GatewayNote]
+  reason: GatewayTerminationReason
+  terminationTime: DateTime
+}
+
+type GenericIdentity implements Identity {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type GenericPlace implements Place & ThingContainer {
+  address: Address
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  connectors(filter: ConnectorFilterInput): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  description: String
+  exactType: String
+  floors(filter: FloorFilter): [Floor] @auth(permissions : ["Place.Read.All"])
+  geoshape: GeoJSON
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  id: String!
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  mappingKey: String
+  name: String
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"])
+  sites(filter: SiteFilter): [Site] @auth(permissions : ["Place.Read.All"])
+  things(filter: ThingFilter): [Thing] @auth(permissions : ["Thing.Read.All"])
+  type: [String]
+}
+
+type GeoPoint {
+  coordinates: [Float]
+  type: String
+}
+
+"Currently in development; will contain the details about an access grant."
+type Grant {
+  approvalTime: DateTime
+  grantedPlacesAndTypes: [GrantPlacesAndTypes]
+  granteeUserId: String
+  grantorNotes: [GrantNote]
+  grantorUserId: String
+  "The unique ID of the grant."
+  id: String
+  requestTime: DateTime
+  requests: [GrantRequest]
+  state: GrantState
+  updateTime: DateTime
+}
+
+type GrantCreateResponse {
+  id: String
+}
+
+type GrantDeleteResponse {
+  _: String
+}
+
+type GrantNote {
+  note: String
+  time: DateTime
+}
+
+type GrantPlacesAndTypes {
+  grantedIds: [String]
+  grantedSystemTypes: [SystemTypeKey]
+}
+
+type GrantRequest {
+  requestNote: String
+  requestType: GrantRequestType
+  systemTypes: [SystemTypeKey]
+}
+
+type GrantUpdateResponse {
+  _: String
+}
+
+type HMAC256 {
+  signingKeys: [String]
+}
+
+"Contains the details about a user invite."
+type Invite {
+  "This timestamp represents the date the invite was created."
+  created: DateTime
+  "The email of the user receiving the invite."
+  email: String
+  "The expiration of the invite; once an invite expires, it cannot be accepted any longer."
+  expiration: DateTime
+  "The id of the invite itself."
+  id: String
+  "The id of the user that is created after accepting the invite."
+  inviterUserId: String
+  "The organization the user was invited to join."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "id"}])
+  "The role or roles assigned to the user when they accept the invite, such as ADMIN."
+  roles: [Role]
+  "The current status of the invite, such as PENDING or ACCEPTED."
+  status: InviteStatus
+}
+
+type InviteCreateResponse {
+  invite: Invite
+  inviteToken: String
+}
+
+type InviteDeleteResponse {
+  _: String
+}
+
+type InviteUpdateResponse {
+  invite: Invite
+}
+
+type Lease {
+  connectors(filter: ConnectorFilterInput): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  description: String
+  exactType: String
+  id: String!
+  leaseOf(filter: PlaceFilter): [Place] @auth(permissions : ["Place.Read.All"])
+  leasee: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "organizationId", childField : "id"}])
+  mappingKey: String
+  name: String
+  type: [String]
+}
+
+"Contains all the detals about a live query."
+type LiveQuery {
+  "This timestamp represents the date the live query was created."
+  dateCreated: DateTime
+  "This timestamp represents the date the lie query was last updated."
+  dateUpdated: DateTime
+  "The unique id of the live query."
+  id: String
+  "This timestamp represents the last time the live query encountered an error."
+  lastErrorDate: DateTime
+  "This returns the last result of the live query, in standard Mapped JSON format."
+  lastResult: GraphQLJSON @auth(permissions : ["LiveQuery.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/GetLatestResult", returnField : "lastResult", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "id"}])
+  "This timestamp represents the date for the most recent live query result."
+  lastResultDate: DateTime
+  "The unique name of the live query."
+  name: String
+  "The organization the live query belongs to."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "id"}])
+  "The query being run by the live query, i.e. the request being made to the Mapped API."
+  query: String
+  "This identifies whether the live query is currently RUNNING, PAUSED, FAILED or LIVE_QUERY_STATUS_UNSPECIFIED."
+  status: LiveQueryStatus
+  "The user the live query belong to."
+  user: User @auth(permissions : ["User.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/Get", returnField : "user", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "userId", childField : "id"}])
+  variables: GraphQLJSON
+}
+
+type LiveQueryCreateResponse {
+  liveQuery: LiveQuery
+}
+
+type LiveQueryDeleteResponse {
+  _: String
+}
+
+type LiveQueryPauseResponse {
+  _: String
+}
+
+type LiveQueryResumeResponse {
+  _: String
+}
+
+type LiveQueryUpdateResponse {
+  liveQuery: LiveQuery
+}
+
+type MetadataEntry {
+  key: String
+  value: String
+}
+
+type MetadataRecord {
+  key: String
+  value: String
+}
+
+"Mutations modify data in the data store. They can be used to insert, update, or delete data."
+type Mutation {
+  "Used to assign a provisioned gateway to a building and/or spaces."
+  assignGateway(
+    "Provide the required input values here, such as the gateway ID and place IDs."
+    input: GatewayAssignRequestInput
+  ): GatewayAssignResponse @auth(permissions : ["Gateway.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.gateways.GatewaysService/Assign", returnLookupKeyOnFailure : false)
+  "Used to assign a new acount role to a user (such as ADMIN); does not remove the previously assigned role."
+  assignRole(
+    "Provide the required input values here, such as the user ID and role."
+    input: UserAssignRoleRequestInput
+  ): UserAssignRoleResponse @auth(permissions : ["User.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/AssignRole", returnLookupKeyOnFailure : false)
+  "Used to create a new building for a specific site."
+  createBuilding(
+    "Provide the required input values here, such as the address of the building and the siteId."
+    input: BuildingCreateRequestInput
+  ): BuildingCreateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.buildings.BuildingService/Create", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to create a new Connector."
+  createConnector(
+    "Provide the required input values here, such as config details."
+    input: ConnectorCreateRequestInput
+  ): ConnectorCreateResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Create", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to create the auth details for a Connector, including token details."
+  createConnectorAuth(
+    "Provide the required input values here, such as token information or user/pass details."
+    input: ConnectorAuthCreateRequestInput
+  ): ConnectorAuthCreateResponse @auth(permissions : ["ConnectorAuth.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.connectorauth.ConnectorAuthService/Create", returnLookupKeyOnFailure : false)
+  createConnectorRequest(input: ConnectorRequestCreateRequestInput): ConnectorRequestCreateResponse @auth(permissions : ["Connector.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.requests.ConnectorRequestsService/Create", returnLookupKeyOnFailure : false)
+  createContributionRequest(input: ContributionRequestCreateRequestInput): ContributionRequestCreateResponse @auth(permissions : ["ContributionRequest.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.contributions.requests.ContributionRequestService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new floor for a specific building."
+  createFloor(
+    "Provide the required input values here, such as the level of the floor and the geoshape details."
+    input: FloorCreateRequestInput
+  ): FloorCreateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.floors.FloorService/Create", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to add an access right grant to an external user so they can view specific organization place data (like granting building tenants the right to view data about a particular space)."
+  createGrant(
+    "Provide the required input values here, such as place details."
+    input: GrantCreateRequestInput
+  ): GrantCreateResponse @auth(permissions : ["Grants.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.grants.GrantsService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new invite to add a new user to the org."
+  createInvite(
+    "Provide the required input values here, such as the user's email and intended role."
+    input: InviteCreateRequestInput
+  ): InviteCreateResponse @auth(permissions : ["User.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.invites.InvitesService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new live query."
+  createLiveQuery(
+    "Provide the required input values here, such as a unique name and the query you want monitored."
+    input: LiveQueryCreateRequestInput
+  ): LiveQueryCreateResponse @auth(permissions : ["LiveQuery.ReadWrite.All"]) @grpc(authMods : [PAT], flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new personal access token, assuming the token you're using has the needed scope (PERSONALACCESSTOKEN_READWRITE or the admin scope PERSONALACCESSTOKEN_READWRITE_ALL)."
+  createPersonalAccessToken(
+    "Provide the required input values here, such as permissions/scopes."
+    input: PersonalAccessTokenCreateRequestInput
+  ): PersonalAccessTokenCreateResponse @auth(permissions : ["PersonalAccessToken.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.pat.PersonalAccessTokenService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new site for the org."
+  createSite(
+    "Provide the required input values here, in specific the desired name for the site."
+    input: SiteCreateRequestInput
+  ): SiteCreateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.sites.SiteService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new space for a floor in a building."
+  createSpace(
+    "Provide the required input values here, such as the name and exactType of the building (such as Office)."
+    input: SpaceCreateRequestInput
+  ): SpaceCreateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.spaces.SpaceService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new user in the organization; only available for admins."
+  createUser(
+    "Provide the required input values here, including user details like name and email address."
+    input: UserCreateRequestInput
+  ): UserCreateResponse @auth(permissions : ["User.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/Create", returnLookupKeyOnFailure : false)
+  "Used to create a new webhook."
+  createWebhookTarget(
+    "Provide the required input values here, including the name of the webhook and the actual target destination such as an HTTP URL."
+    input: WebhookTargetCreateRequestInput
+  ): WebhookTargetCreateResponse @auth(permissions : ["WebhookTarget.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.webhooks.target.WebhooksTargetService/Create", returnLookupKeyOnFailure : false)
+  "Used to delete an existing building."
+  deleteBuilding(
+    "Provide the ID of the building you want to delete here."
+    input: BuildingDeleteRequestInput
+  ): BuildingDeleteResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.buildings.BuildingService/Delete", returnLookupKeyOnFailure : false)
+  "Used to remove an existing Connector."
+  deleteConnector(
+    "Provide the ID of the Connector you want to delete here."
+    input: ConnectorDeleteRequestInput
+  ): ConnectorDeleteResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete the auth settings for a specific Connector."
+  deleteConnectorAuth(
+    "Provide the ID of the Connector auth you want to delete here; note this is not the same ID as the connector itself."
+    input: ConnectorAuthDeleteRequestInput
+  ): ConnectorAuthDeleteResponse @auth(permissions : ["ConnectorAuth.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.connectorauth.ConnectorAuthService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete an existing floor in a building."
+  deleteFloor(
+    "Provide the ID of the floor you want to delete here."
+    input: FloorDeleteRequestInput
+  ): FloorDeleteResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.floors.FloorService/Delete", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to remove an access grant from an external user."
+  deleteGrant(
+    "Provide the required input values here, such as the ID of the grant you want to delete."
+    input: GrantDeleteRequestInput
+  ): GrantDeleteResponse @auth(permissions : ["Grants.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.grants.GrantsService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete an user invite."
+  deleteInvite(
+    "Provide the ID of the invite you want to delete here."
+    input: InviteDeleteRequestInput
+  ): InviteDeleteResponse @auth(permissions : ["User.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.invites.InvitesService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete a live query."
+  deleteLiveQuery(
+    "Provide the ID of the live query you want to delete here."
+    input: LiveQueryDeleteRequestInput
+  ): LiveQueryDeleteResponse @auth(permissions : ["LiveQuery.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete an existing personal access token, assuming the token you're using has the needed scope (PERSONALACCESSTOKEN_READWRITE or the admin scope PERSONALACCESSTOKEN_READWRITE_ALL)."
+  deletePersonalAccessToken(
+    "Provide the ID of the connector you want to delete here; note this is not the actual token itself, it is the ID for the token."
+    input: PersonalAccessTokenDeleteRequestInput
+  ): PersonalAccessTokenDeleteResponse @auth(permissions : ["PersonalAccessToken.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.pat.PersonalAccessTokenService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete a specific site from the org."
+  deleteSite(
+    "Provide the ID of the site you want to delete here."
+    input: SiteDeleteRequestInput
+  ): SiteDeleteResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.sites.SiteService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete a specific space from a floor in a building."
+  deleteSpace(
+    "Provide the ID of the space you want to delete here."
+    input: SpaceDeleteRequestInput
+  ): SpaceDeleteResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.spaces.SpaceService/Delete", returnLookupKeyOnFailure : false)
+  "Used to delete a specific webhook."
+  deleteWebhookTarget(
+    "Provide the ID of the webhook you want to delete here."
+    input: WebhookTargetDeleteRequestInput
+  ): WebhookTargetDeleteResponse @auth(permissions : ["WebhookTarget.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.webhooks.target.WebhooksTargetService/Delete", returnLookupKeyOnFailure : false)
+  doesOrgExist(input: BusinessDoesOrgExistRequestInput): BusinessDoesOrgExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgExist", returnLookupKeyOnFailure : false)
+  doesOrgFeatureExist(input: BusinessDoesOrgFeatureExistRequestInput): BusinessDoesOrgFeatureExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgFeatureExist", returnLookupKeyOnFailure : false)
+  doesOrgHaveAccessToPlan(input: BusinessDoesOrgHaveAccessToPlanRequestInput): BusinessDoesOrgHaveAccessToPlanResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgHaveAccessToPlan", returnLookupKeyOnFailure : false)
+  doesOrgPermissionExist(input: BusinessDoesOrgPermissionExistRequestInput): BusinessDoesOrgPermissionExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgPermissionExist", returnLookupKeyOnFailure : false)
+  doesOrgPlanExist(input: BusinessDoesOrgPlanExistRequestInput): BusinessDoesOrgPlanExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgPlanExist", returnLookupKeyOnFailure : false)
+  doesOrgPlanGroupExist(input: BusinessDoesOrgPlanGroupExistRequestInput): BusinessDoesOrgPlanGroupExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgPlanGroupExist", returnLookupKeyOnFailure : false)
+  doesOrgPlanGroupPlanExist(input: BusinessDoesOrgPlanGroupPlanExistRequestInput): BusinessDoesOrgPlanGroupPlanExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgPlanGroupPlanExist", returnLookupKeyOnFailure : false)
+  doesOrgUserExist(input: BusinessDoesOrgUserExistRequestInput): BusinessDoesOrgUserExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesOrgUserExist", returnLookupKeyOnFailure : false)
+  doesPlanFeatureExist(input: BusinessDoesPlanFeatureExistRequestInput): BusinessDoesPlanFeatureExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesPlanFeatureExist", returnLookupKeyOnFailure : false)
+  doesPlanProviderExist(input: BusinessDoesPlanProviderExistRequestInput): BusinessDoesPlanProviderExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesPlanProviderExist", returnLookupKeyOnFailure : false)
+  doesPlanProviderPlanExist(input: BusinessDoesPlanProviderPlanExistRequestInput): BusinessDoesPlanProviderPlanExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesPlanProviderPlanExist", returnLookupKeyOnFailure : false)
+  doesRoleGroupExist(input: BusinessDoesRoleGroupExistRequestInput): BusinessDoesRoleGroupExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesRoleGroupExist", returnLookupKeyOnFailure : false)
+  doesRoleGroupPermissionExist(input: BusinessDoesRoleGroupPermissionExistRequestInput): BusinessDoesRoleGroupPermissionExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesRoleGroupPermissionExist", returnLookupKeyOnFailure : false)
+  doesRoleGroupRoleExist(input: BusinessDoesRoleGroupRoleExistRequestInput): BusinessDoesRoleGroupRoleExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesRoleGroupRoleExist", returnLookupKeyOnFailure : false)
+  doesRoleGroupUserExist(input: BusinessDoesRoleGroupUserExistRequestInput): BusinessDoesRoleGroupUserExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesRoleGroupUserExist", returnLookupKeyOnFailure : false)
+  doesRolePermissionExist(input: BusinessDoesRolePermissionExistRequestInput): BusinessDoesRolePermissionExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesRolePermissionExist", returnLookupKeyOnFailure : false)
+  doesUserExist(input: BusinessDoesUserExistRequestInput): BusinessDoesUserExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesUserExist", returnLookupKeyOnFailure : false)
+  doesUserPermissionExist(input: BusinessDoesUserPermissionExistRequestInput): BusinessDoesUserPermissionExistResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/DoesUserPermissionExist", returnLookupKeyOnFailure : false)
+  "Used to enable or disable a webhook using a true / false boolean."
+  enableWebhookTarget(
+    "Provide the ID of the webhook you want to edit, and whether it's enabled (true) or disabled (false)"
+    input: WebhookTargetEnableRequestInput
+  ): WebhookTargetEnableResponse @auth(permissions : ["WebhookTarget.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.webhooks.target.WebhooksTargetService/Enable", returnLookupKeyOnFailure : false)
+  "Used to generate containerized software gateway security identifiers."
+  generateContainerSIDs(
+    "_"
+    input: GatewayGenerateContainerSIDsRequestInput
+  ): GatewayGenerateContainerSIDsResponse @auth(permissions : ["Gateway.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.gateways.GatewaysService/GenerateContainerSIDs", returnLookupKeyOnFailure : false)
+  "Used to pause a live query, so it stops actively monitoring for changes."
+  pauseLiveQuery(
+    "Provide the ID of the live query here."
+    input: LiveQueryPauseRequestInput
+  ): LiveQueryPauseResponse @auth(permissions : ["LiveQuery.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/Pause", returnLookupKeyOnFailure : false)
+  "Creates the container for a software gateway."
+  registerGatewayContainer(
+    "Public and private key information for the container will go here."
+    input: GatewayRegisterContainerRequestInput
+  ): GatewayRegisterContainerResponse @auth(permissions : ["Gateway.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.gateways.GatewaysService/RegisterContainer", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to remove an access grant related org membership for a particular user."
+  removeOrgMembershipUser(
+    "Provide the ID of the user and org here."
+    input: UserRemoveOrgMembershipRequestInput
+  ): UserRemoveOrgMembershipResponse @auth(permissions : ["User.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/RemoveOrgMembership", returnLookupKeyOnFailure : false)
+  removeOrgUser(input: OrgRemoveOrgUserAsyncRequestInput): OrgRemoveOrgUserAsyncResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/RemoveOrgUserAsync", returnLookupKeyOnFailure : false)
+  "Used to remove a role from a user (such as ADMIN)."
+  removeRole(
+    "Provide the ID of the user, and the role you want to remove."
+    input: UserRemoveRoleRequestInput
+  ): UserRemoveRoleResponse @auth(permissions : ["User.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/RemoveRole", returnLookupKeyOnFailure : false)
+  "Used to restart a Connector, typically a troubleshooting step if a Connector ceases to feed data to the graph."
+  restartConnector(
+    "Provide the ID of the Connector here."
+    input: ConnectorRestartRequestInput
+  ): ConnectorRestartResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Restart", returnLookupKeyOnFailure : false)
+  "Used to resume/restart a live query that was paused, so it starts actively monitoring for changes again."
+  resumeLiveQuery(
+    "Provide the ID of the live query here."
+    input: LiveQueryResumeRequestInput
+  ): LiveQueryResumeResponse @auth(permissions : ["LiveQuery.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/Resume", returnLookupKeyOnFailure : false)
+  "Used to start a Connector back up after it was stopped."
+  startConnector(
+    "Provide the ID of the Connector here."
+    input: ConnectorStartRequestInput
+  ): ConnectorStartResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Start", returnLookupKeyOnFailure : false)
+  "Used to stop a Connector from polling for data or processing incoming webhook data. All config and mapping is preserved."
+  stopConnector(
+    "Provide the ID of the Connector here."
+    input: ConnectorStopRequestInput
+  ): ConnectorStopResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Stop", returnLookupKeyOnFailure : false)
+  "Used to suspend a gateway; this takes the gateway offline and prevents it from receiving or sending any further data."
+  suspendGateway(
+    "Provide the ID of the gateway you want to suspend, and the details about the suspension (like notes)."
+    input: GatewaySuspendRequestInput
+  ): GatewaySuspendResponse @auth(permissions : ["Gateway.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.gateways.GatewaysService/Suspend", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific building."
+  updateBuilding(
+    "Provide the building details you want to update here, such as name and address."
+    input: BuildingUpdateRequestInput
+  ): BuildingUpdateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.buildings.BuildingService/Update", returnLookupKeyOnFailure : false)
+  "Used to update an existing Connector."
+  updateConnector(
+    "Provide the required input values here, such as config details."
+    input: ConnectorUpdateRequestInput
+  ): ConnectorUpdateResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/Update", returnLookupKeyOnFailure : false)
+  updateConnectorAuth(input: ConnectorAuthUpdateRequestInput): ConnectorAuthUpdateResponse @auth(permissions : ["ConnectorAuth.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.connectorauth.ConnectorAuthService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific floor in a building."
+  updateFloor(
+    "Provide the floor details you want to update here, such as level and geoshape."
+    input: FloorUpdateRequestInput
+  ): FloorUpdateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.floors.FloorService/Update", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to update/modify an existing access grant."
+  updateGrant(
+    "Provide the required input values here, such as place and type details."
+    input: GrantUpdateRequestInput
+  ): GrantUpdateResponse @auth(permissions : ["Grants.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.grants.GrantsService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific user invite."
+  updateInvite(
+    "Provide the invite details you want to update here, such as the assigned role."
+    input: InviteUpdateRequestInput
+  ): InviteUpdateResponse @auth(permissions : ["User.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.invites.InvitesService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific live query."
+  updateLiveQuery(
+    "Provide the live query details you want to update here, such as the name."
+    input: LiveQueryUpdateRequestInput
+  ): LiveQueryUpdateResponse @auth(permissions : ["LiveQuery.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.livequery.LiveQueryService/Update", returnLookupKeyOnFailure : false)
+  "Used to update your organization information, such as the organization name."
+  updateOrganization(
+    "Provide the specific org details you want to update here."
+    input: OrgUpdateRequestInput
+  ): OrgUpdateResponse @auth(permissions : ["Org.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Update", returnLookupKeyOnFailure : false)
+  updateOrganizationV2(input: OrgUpdateV2RequestInput): OrgUpdateV2Response @auth(permissions : ["Org.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/UpdateV2", returnLookupKeyOnFailure : false)
+  "Used to update the scopes of an existing personal access token."
+  updatePersonalAccessToken(
+    "Provide the token details you want to update here, such as permissions/scopes."
+    input: PersonalAccessTokenUpdateRequestInput
+  ): PersonalAccessTokenUpdateResponse @auth(permissions : ["PersonalAccessToken.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.vault.pat.PersonalAccessTokenService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific site."
+  updateSite(
+    "Provide the site details you want to update here, such as the name."
+    input: SiteUpdateRequestInput
+  ): SiteUpdateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.sites.SiteService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific space on a floor in a building."
+  updateSpace(
+    "Provide the space details you want to update here, such as name and exactType."
+    input: SpaceUpdateRequestInput
+  ): SpaceUpdateResponse @auth(permissions : ["Place.ReadWrite.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.core.places.spaces.SpaceService/Update", returnLookupKeyOnFailure : false)
+  "Used to update information about a user. If you're using an admin token, you can update the information of other users; if not, you can only update your own details."
+  updateUser(
+    "Provide the specific user details you want to update here, like name."
+    input: UserUpdateRequestInput
+  ): UserUpdateResponse @auth(permissions : ["User.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/Update", returnLookupKeyOnFailure : false)
+  "Used to update the details of a specific webhook."
+  updateWebhookTarget(
+    "Provide the webhook details you want to update here, such as name and maxRetry value."
+    input: WebhookTargetUpdateRequestInput
+  ): WebhookTargetUpdateResponse @auth(permissions : ["WebhookTarget.ReadWrite"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.webhooks.target.WebhooksTargetService/Update", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to update an existing connector configuration, or create a new configuration if one does not already exist."
+  upsertConfigConnector(
+    "Provide the specific config details you want to update here."
+    input: ConnectorUpsertConfigRequestInput
+  ): ConnectorUpsertConfigResponse @grpc(flattenRequest : false, invoke : "mapped.cloud.api.connectors.ConnectorService/UpsertConfig", returnLookupKeyOnFailure : false)
+}
+
+type NameIdentity implements Identity & NameIdentityModel {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type OAuth2ClientCredentialsFlow {
+  clientId: String
+  clientSecret: String
+  headerPrefix: String
+  scope: String
+  tokenEndpoint: String
+}
+
+type OneTimePriceItem {
+  priceId: String
+  tier: Tier
+}
+
+type OneTimePriceItems {
+  items: [OneTimePriceItem]
+}
+
+"Contains the details about a org."
+type Org {
+  "Contains the list of org connectors, across all places in the org."
+  connectors(
+    "This filter is most often used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "filter.orgId.eq"}])
+  "Timestamp for the org creation."
+  created: DateTime
+  "Contains the list of org gateways, across all places in the org."
+  gateways(
+    "This filter is most often used to restrict results to a specific gateway or gateways."
+    filter: GatewayFilterInput
+  ): [Gateway] @auth(permissions : ["Gateway.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.gateways.GatewaysService/List", returnField : "gateways", returnLookupKeyOnFailure : false)
+  "The unique ID of the organization."
+  id: String
+  metadata: [MetadataRecord]
+  "The name of the organization."
+  name: String
+  permissions: [String] @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/ListOrgPermissions", returnField : "permissions", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "orgId"}])
+  provisioningState: OrgProvisioningState
+  "Contains the list of sites in the org."
+  sites: [Site] @auth(permissions : ["Place.Read.All"]) @relationMapping(mappings : [{parentField : "id", childField : "organizationId"}])
+  state: OrgState
+  stripeCustomerId: String
+  "Contains the list of things, across all places in the org."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"]) @relationMapping(mappings : [{parentField : "id", childField : "organizationId"}])
+  updated: DateTime
+  "Contains the list of users in the org."
+  users(
+    "This filter is most often used to restruct results to a specific user or users."
+    filter: UserFilterInput
+  ): [User] @auth(permissions : ["User.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.orgs.users.UserService/List", returnField : "users", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "filter.orgId.eq"}])
+}
+
+type OrgRemoveOrgUserAsyncResponse {
+  _: String
+}
+
+type OrgUpdateResponse {
+  org: Org
+}
+
+type OrgUpdateV2Response {
+  org: Org
+}
+
+"Contains the details about a individual detected in the data from a building, such as a conference room booking."
+type Person {
+  additionalName: String
+  "Any emails associated with the individual."
+  emails: [EmailAddress]
+  "Surname or last name of the individual."
+  familyName: String
+  "Personal name or first name of the individual."
+  givenName: String
+  hasCalendarEvents(filter: CalendarEventFilter): [CalendarEvent]
+  hasCalendarInvitations(filter: CalendarInvitationFilter): [CalendarInvitation]
+  "The unique ID of the individual."
+  id: String!
+  identities: [PersonIdentityUnion]
+  name: String
+}
+
+"Contains the details about a personal access token."
+type PersonalAccessToken {
+  "Timestamp of the token creation."
+  created: DateTime
+  "The unique ID of the access token."
+  id: String
+  integrityId: String
+  "The last time the token was used."
+  lastExchanged: DateTime
+  "The name assigned to the access token."
+  name: String
+  "The available permissions / scopes for the token, such as THING_READ_ALL"
+  permissions: [Permission]
+  "Timestamp the token was last updated, including when permissions were added or removed."
+  updated: DateTime
+  "The user the token belongs to."
+  userId: String
+}
+
+type PersonalAccessTokenCreateResponse {
+  pat: PersonalAccessToken
+  token: String
+}
+
+type PersonalAccessTokenDeleteResponse {
+  _: String
+}
+
+type PersonalAccessTokenUpdateResponse {
+  pat: PersonalAccessToken
+  token: String
+}
+
+"Contains the details about the point, such as a thermostat setpoint."
+type Point {
+  "Time series data gathered together to return a new value, such as an average temperature across a set time pe or a min or max value."
+  aggregation(
+    "The ending timestamp for the aggregated series data."
+    endTime: DateTime,
+    "The interval of time to use for the aggregation. Supports DAY, HOUR and MINUTE."
+    period: TimeseriesAggPeriodInput,
+    periodIncrement: Int,
+    "The starting timestamp for the aggregated series data."
+    startTime: DateTime
+  ): [TimeseriesAggregateRow] @auth(permissions : ["Thing.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.timeseries.TimeseriesService/Aggregate", returnField : "rows", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "pointId"}])
+  "This timestamp represents the date the point was created."
+  dateCreated: DateTime
+  "This timestamp represents that date the point was last updated."
+  dateUpdated: DateTime
+  "The description of the point, like \"Cooling Temperature Setpoint\"."
+  description: String
+  "This is the most specific type available for the point, i.e. where 'type' may return a list like [Point, Alarm, TemperatureAlarm, HighTemperatureAlarm], exactType will return just HighTemperatureAlarm."
+  exactType: String
+  "The unique ID of the point."
+  id: String!
+  identities: [PointIdentityUnion]
+  isPointOf: [IsPointOfUnion] @graph(direction : IN, edgeName : "hasPoint")
+  mappingKey: String
+  "The name assigned to the point."
+  name: String
+  "Time series data for the point, such as what the air temperature setpoint was for a VAV, limited by a defined start and end time."
+  series(
+    "The ending timestamp for the series data."
+    endTime: DateTime,
+    "If set to 'true', will return the last timeseries value we have for the point."
+    latest: Boolean,
+    "The starting timestamp for the series data."
+    startTime: DateTime
+  ): [TimeseriesRow] @auth(permissions : ["Thing.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.timeseries.TimeseriesService/List", returnField : "rows", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "pointId"}])
+  "Ordered list of additional descriptive data to help explain float values like 0.0, 1.0 and 2.0."
+  stateTexts: [String]
+  "The class or subclass of the point, like \"Alarm\" and \"TemperatureAlarm\"."
+  type: [String]
+  "The unit of measurement associated with this point, such as \"Degrees\"."
+  unit: Unit @grpc(flattenRequest : false, invoke : "mapped.cloud.api.ontology.units.UnitService/Get", returnField : "unit", returnLookupKeyOnFailure : true) @relationMapping(mappings : [{parentField : "unit", childField : "id"}])
+  valueMap: Map
+}
+
+type PostalAddressIdentity implements Identity & PostalAddressIdentityModel {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type ProductBundleResponse {
+  archived_at: DateTime
+  created_at: DateTime
+  description: String
+  interval: Interval
+  items: [ProductPriceItemResponse]
+  metadata: [MetadataEntry]
+  plan: String
+  productType: ProductType
+  sku: String
+  slug: String
+  state: BundleState
+  title: String
+  updated_at: DateTime
+}
+
+type ProductPriceItemResponse {
+  lookupKey: String
+  metadata: [MetadataEntry]
+  oneTimePriceItems: OneTimePriceItems
+  priceId: String
+  quantityEnabled: Boolean
+  quantityRange: QuantityRange
+  slug: String
+  tiers: [Tier]
+  tiersMode: String
+  type: PriceType
+  unitAmount: Long
+  unitAmountDecimal: String
+}
+
+type QuantityRange {
+  max: Long
+  min: Long
+}
+
+"Queries retrieve data from the data store."
+type Query {
+  "Returns the complete list of Connector Types (type = category or vendor) available to you for install; this does not reflect which Connectors are already installed, use \"connectors\" for that query."
+  availableConnectorTypes(
+    "This filter is typically used to restrict results to a specific connector type or types."
+    filter: ConnectorTypeFilterInput,
+    includeRequested: Boolean,
+    includeUponRequest: Boolean
+  ): ConnectorTypeListAvailableResponse @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.types.ConnectorTypesService/ListAvailable", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "orgId"}])
+  "Buildings are subsections of sites, where each site may have multiple associated buildings. Use this query to view building specific data such as id, name and geoshape."
+  buildings(
+    "This filter is typically used to restrict results to a specific building or buildings."
+    filter: BuildingFilter
+  ): [Building] @auth(permissions : ["Place.Read.All"])
+  "Currently in development; will be used in association with Connectors that expose calendar events such as scheduled meetings."
+  calendarEvents(
+    "This filter is used to return information about a specific calendar event."
+    filter: CalendarEventFilter
+  ): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  "Currently in development."
+  connectorAuth(
+    "Provide the ID for the connector auth here."
+    id: String
+  ): ConnectorAuth @auth(permissions : ["ConnectorAuth.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.vault.connectorauth.ConnectorAuthService/Get", returnField : "connectorAuth", returnLookupKeyOnFailure : false)
+  "Currently in development."
+  connectorTypes(
+    "This filter is most often used to restrict results to a specific connector type or types."
+    filter: ConnectorTypeFilterInput
+  ): [ConnectorType] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.types.ConnectorTypesService/List", returnField : "connectorTypes", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "orgId"}])
+  "Use this query to view data about the Connectors configured for the organization, including gateways."
+  connectors(
+    "This filter is typically used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "filter.orgId.eq"}])
+  "Floors are subsections of buildings, typically identified numerically like \"floor1\". Use this query to view floor specific data such as id, name or geoshape."
+  floors(
+    "This filter is typically used to restrict results to a specific floor or floors."
+    filter: FloorFilter
+  ): [Floor] @auth(permissions : ["Place.Read.All"])
+  "Provides details about the gateways associated with the organization, such as id or provisioning/active status."
+  gateways(
+    "This filter is typically used to restrict results to a specific gateway or gateways."
+    filter: GatewayFilterInput
+  ): [Gateway] @auth(permissions : ["Gateway.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.gateways.GatewaysService/List", returnField : "gateways", returnLookupKeyOnFailure : false)
+  getOrgMembershipsUser: [UserOrgDetail] @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/GetOrgMemberships", returnField : "orgs", returnLookupKeyOnFailure : false)
+  "Currently in development; will be used to list details about grants that provide access rights to parties outside the organization (like granting building tenants the right to view data about their spaces)"
+  grants(
+    "This filter is typically used to restrict results to a specific grant or grants."
+    filter: GrantFilterInput
+  ): [Grant] @auth(permissions : ["Grants.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.grants.GrantsService/List", returnField : "grants", returnLookupKeyOnFailure : false)
+  "Invites are used to add additional users to the org. Use this query to return the list of user invites created by your org, including those that were ACCEPTED or still PENDING."
+  invites(
+    "This filter typically used to restrict results to a specific invite or invites."
+    filter: InviteFilterInput
+  ): [Invite] @auth(permissions : ["User.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.orgs.invites.InvitesService/List", returnField : "invites", returnLookupKeyOnFailure : false)
+  leases(filter: LeaseFilter): [Lease]
+  "Live queries are GraphQL queries created once and then remain active, monitoring for changes perpetually for easy retrieval. Typically paired with a webhook to get proactive notificiations of changes pushed to an endpoint."
+  liveQueries(
+    "This filter typically used to restrict results to a specific live query or queries."
+    filter: LiveQueryFilterInput
+  ): [LiveQuery] @auth(permissions : ["LiveQuery.Read"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.livequery.LiveQueryService/List", returnField : "liveQueries", returnLookupKeyOnFailure : false)
+  "Use this query to view data about the user associated with the token, such as name or id."
+  me: User @auth(permissions : ["User.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/GetMe", returnField : "user", returnLookupKeyOnFailure : false)
+  "Use this query to view data about the organization associated with the the token, such as name or id."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "id"}])
+  "Currently in development and will be used in with connectors that expose information about individuals, such as calendar events."
+  people(
+    "This filter is used to return information about a specific person."
+    filter: PersonFilter
+  ): [Person] @auth(permissions : ["Person.Read.All"])
+  "A particular output at a particular time, like on/off for a device like a light. For more complex devices like a thermostat, points could be the ambient temperature in the room, what temperature is set, is the thermostat set to heat or set to cool."
+  points(
+    "This filter is typically used to restrict results to a specific point or points."
+    filter: PointFilter
+  ): [Point] @auth(permissions : ["Thing.Read.All"])
+  "For internal use only."
+  productBundleSubscriptions: [BillingProductBundleSubscriptionResponse] @auth(permissions : ["Billing.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.billing.BillingService/ListProductBundleSubscriptions", returnField : "productBundles", returnLookupKeyOnFailure : false)
+  "Sites are the top level place - they contain buildings, which contain floors, which contain spaces. Use this query to view site specific data such as id, name or geoshape."
+  sites(
+    "This filter is typically used to restrict results to a specific site or sites."
+    filter: SiteFilter
+  ): [Site] @auth(permissions : ["Place.Read.All"])
+  "Spaces are subsections of a floor, such as an office or a breakroom. Use this query to view space specific data such as id, name or geoshape."
+  spaces(
+    "This filter is typically used to restrict results to a specific space or spaces."
+    filter: SpaceFilter
+  ): [Space] @auth(permissions : ["Place.Read.All"])
+  "All the devices in your places - HVAC systems, security systems, lighting, badge readers, elevators and similar."
+  things(
+    "This filter is most often used torestrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  "This will return information about the tokens in your account, or if you're an admin, you can look at tokens for other users. Note this will not return the actual Personal Access Token, only the token record id and data like the name and scopes."
+  tokens(
+    "This filter is typically used to restrict results to a specific token or tokens."
+    filter: PersonalAccessTokenFilterInput
+  ): [PersonalAccessToken] @auth(permissions : ["PersonalAccessToken.Read"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.vault.pat.PersonalAccessTokenService/List", returnField : "pats", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "filter.orgId.eq"}])
+  "Predefined / global list containing units of measurement for point data, such as \"Degrees\". Used for timeseries data comprehension, i.e. series data for a point shows \"65\", units helps you understand that means 65 degrees."
+  units(
+    "This filter is typically used to restrict results to a specific unit or units."
+    filter: UnitFilterInput
+  ): [Unit] @grpc(flattenRequest : true, invoke : "mapped.cloud.api.ontology.units.UnitService/List", returnField : "units", returnLookupKeyOnFailure : false)
+  "If you're an admin, use this query to retrieve data about users. If you're a non-admin user, you can review the listed data about yourself."
+  users(
+    "This filter is typically used to restrict results to a specific user or users."
+    filter: UserFilterInput
+  ): [User] @auth(permissions : ["User.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.orgs.users.UserService/List", returnField : "users", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "$ctx.orgId", childField : "filter.orgId.eq"}])
+  "Used to return data about webhook targets created by org admins."
+  webhookTargets(
+    "This filter is used to return information about a specific webhook."
+    filter: WebhookTargetFilterInput
+  ): [WebhookTarget] @auth(permissions : ["WebhookTarget.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.webhooks.target.WebhooksTargetService/List", returnField : "targets", returnLookupKeyOnFailure : false)
+}
+
+"Contains the details about a site."
+type Site implements Place & ThingContainer {
+  "All the buildings in a site will be listed here."
+  buildings(
+    "This filter is most often used to restrict results to a specific building or buildings."
+    filter: BuildingFilter
+  ): [Building] @auth(permissions : ["Thing.Read.All"])
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  "Any connectors configured for a site will be listed here."
+  connectors(
+    "This filter is most often used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  "This timestamp represents the date the site was created."
+  dateCreated: DateTime
+  "This timestamp represents that date the site was last updated."
+  dateUpdated: DateTime
+  "The description of a site; often left blank, especially if the site name is already descriptive."
+  description: String
+  exactType: String
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of the site."
+  id: String!
+  identities: [SiteIdentityUnion]
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  "The name assigned to the site, like the name of a campus containing multiple buildings."
+  name: String
+  "The organization a site belongs to; this field will be restricted by access rights."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "organizationId", childField : "id"}])
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"])
+  "All the things associated with a site, or any sublevels of the site (building, floor or space), will show here."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  type: [String]
+}
+
+type SiteCreateResponse {
+  site: SiteMutation
+}
+
+type SiteDeleteResponse {
+  _: String
+}
+
+type SiteMutation {
+  geoshape: GeoJSON @deprecated(reason : "No longer supported")
+  id: String
+  name: String
+}
+
+type SiteUpdateResponse {
+  site: SiteMutation
+}
+
+"Contains the details about the space."
+type Space implements Place & ThingContainer {
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  "Any connectors configured for the space will be listed here."
+  connectors(
+    "This filter is most often used to restrict results to a specific connector or connectors."
+    filter: ConnectorFilterInput
+  ): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  "This timestamp represents the date the space was created."
+  dateCreated: DateTime
+  "This timestamp represents that date the space was last updated."
+  dateUpdated: DateTime
+  "The description of the space; often left blank, especially if the space name is already descriptive."
+  description: String
+  "This is the most specific type available for the space, i.e. where 'type' may return a list like [Place, Space, Room, Office], exactType will return just Office."
+  exactType: String
+  "Contains the details of the floor where the space is present."
+  floor: Floor! @auth(permissions : ["Place.Read.All"])
+  "The geographic shape of the space, represented by latitude/longitude coordinate pairs."
+  geoshape: GeoJSON
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  "_"
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of the space."
+  id: String!
+  identities: [SpaceIdentityUnion]
+  "_"
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  "_"
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  "The name assigned to the space, like \"breakroom\" or \"rm101\"."
+  name: String
+  "_"
+  parentSpaceId: String
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"])
+  "All the things associated with a space will show here."
+  things(
+    "This filter is most often used to restrict results to a specific thing or things."
+    filter: ThingFilter
+  ): [Thing] @auth(permissions : ["Thing.Read.All"])
+  "The class or subclass of a space, like Room and Office."
+  type: [String]
+}
+
+type SpaceCode implements Identity & SpaceCodeModel {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  id: String
+  value: String
+}
+
+type SpaceCreateResponse {
+  space: SpaceMutation
+}
+
+type SpaceDeleteResponse {
+  _: String
+}
+
+type SpaceMutation {
+  exactType: [String]
+  floorId: String
+  geoshape: GeoJSON
+  id: String
+  name: String
+  parentSpaceId: String
+}
+
+type SpaceUpdateResponse {
+  space: SpaceMutation
+}
+
+"Contains the details about a thing."
+type Thing {
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  "The description of a thing, like Rooftop Air Handler."
+  description: String
+  "This is the most specific type available for a thing, i.e. where 'type' may return a list like [Device, HVAC, Damper], exactType will return just Damper."
+  exactType: String
+  feeds: [FeedsUnion] @graph(direction : OUT, edgeName : "feeds")
+  "This is primarily a Building Automation System field; when available, it will provide the firmware version for a device."
+  firmwareVersion: String
+  "The geographic shape of a thing, represented by latitude/longitude coordinate pairs."
+  geoshape: GeoJSON
+  "This represents the location of a thing, such as a space name."
+  hasLocation: Place @graph(direction : OUT, edgeName : "hasLocation")
+  "If a thing has any additional parts, like a VAV with a damper, the damper will be referenced here."
+  hasPart: [Thing] @graph(direction : OUT, edgeName : "hasPart")
+  "_"
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  "The unique ID of a thing."
+  id: String!
+  identities: [ThingIdentityUnion]
+  "_"
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  "If a thing is 'a part of' a different device, like a damper that's part of a VAV, the VAV will be referenced here."
+  isPartOf: [Thing] @graph(direction : IN, edgeName : "hasPart")
+  isVirtual: Boolean
+  "_"
+  mappingKey: String
+  "If available, the model - along with manufacturer information - of a thing will be outlined here."
+  model: DeviceModel @auth(permissions : ["DeviceModel.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.devicelibrary.models.ModelsService/Get", returnField : "model", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "deviceModelId", childField : "id"}])
+  "The name of a thing, usually abbreviations of the thing's description along with location details and/or BAS information."
+  name: String
+  "The organization a thing belongs to; this field will be restricted by access rights."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "organizationId", childField : "id"}])
+  "The details of the place(s) where a thing is located, such as a specific building, floor, or space."
+  places(filter: PlaceFilter): [Place] @auth(permissions : ["Place.Read.All"])
+  "A list of points associated with a thing, such as a temperature setting for a thermostat. Not all things will have points."
+  points(
+    "This filter is most often used to restrict results to a specific point or points."
+    filter: PointFilter
+  ): [Point] @auth(permissions : ["Thing.Read.All"])
+  "The class or subclass of a thing, like HVAC and AHU."
+  type: [String]
+}
+
+type Tier {
+  flatAmount: Long
+  flatAmountDecimal: String
+  unitAmount: Long
+  unitAmountDecimal: String
+  upTo: Long
+}
+
+type TimeseriesAggregateRow {
+  avg: Float
+  count: Int
+  max: Float
+  min: Float
+  sum: Float
+  timestamp: DateTime
+}
+
+type TimeseriesRow {
+  timestamp: DateTime
+  value: TimeseriesRowValue
+}
+
+type TimeseriesRowValue {
+  boolValue: Boolean
+  byteArrayValue: String
+  float32Value: Float
+  float64Value: Float
+  geopointValue: GeoPoint
+  int32Value: Int
+  int64Value: Long
+  json: JSONLD @extract(path : "value")
+  numericalException: TimeseriesNumericalException
+  stringValue: String
+  uint32Value: Int
+  uint64Value: Long
+}
+
+"Contains the details about a unit of measurement for point data."
+type Unit {
+  "The description of a unit, typically a definition of the unit name."
+  description: String
+  "The unique ID of the unit."
+  id: String
+  "The name of the unit, like \"Degree\"."
+  name: String
+}
+
+"Contains the details about a user."
+type User {
+  "The timestamp of the user creation."
+  created: DateTime
+  "The user's email."
+  email: String
+  "True or False, whether the user has verified their email yet."
+  emailVerified: Boolean
+  "The unique ID of the user."
+  id: String
+  lastLogin: DateTime
+  loginsCount: Long
+  "The name of a user - this will be the full name, first and last."
+  name: String
+  "The user's nickname (often just the first name of the user)."
+  nickname: String @deprecated(reason : "No longer supported")
+  "The details for the user's organization."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "id"}])
+  permissions: [String] @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.business.v1.BusinessService/ListOrgUserPermissions", returnField : "permissions", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "orgId"}, {parentField : "id", childField : "userId"}])
+  "Lists the user's roles, such as ADMIN or EXPLORER."
+  roles: [Role]
+  "Lists the tokens for the user - will not return the actual PAT, but will show name, permissions/scopes, when the token was last used."
+  tokens(
+    "This filter is most often used to restrict results to a specific token or tokens."
+    filter: PersonalAccessTokenFilterInput
+  ): [PersonalAccessToken] @auth(permissions : ["PersonalAccessToken.Read"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.vault.pat.PersonalAccessTokenService/List", returnField : "pats", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "id", childField : "filter.userId.eq"}])
+  "Timestamp when one or more user details were last updated."
+  updated: DateTime
+}
+
+type UserAssignRoleResponse {
+  user: User
+}
+
+type UserCreateResponse {
+  user: User
+}
+
+type UserOrgDetail {
+  orgId: String
+  roles: [String]
+}
+
+type UserRemoveOrgMembershipResponse {
+  _: String
+}
+
+type UserRemoveRoleResponse {
+  user: User
+}
+
+type UserUpdateResponse {
+  user: User
+}
+
+"Contains the input values needed to create a webhook target."
+type WebhookTarget {
+  batchedContentModeConfig: WebhookTargetCloudEventBatchedContentModeConfig
+  contentMode: WebhookTargetCloudEventContentMode
+  "True/False Boolean field used to enable or disable a webhook."
+  enabled: Boolean
+  "Fields for eventFilters define what you data you want the webhook to send to your endpoint."
+  eventFilters: WebhookTargetEventFilter
+  "Fields for httpTarget define the details of the endpoint where data will be sent."
+  httpTarget: WebhookTargetHTTPTarget
+  "The unique ID of the webhook."
+  id: String
+  "This defines how many times we will attempt to send a webhook payload before giving up if we don't get a 200 OK response."
+  maxRetry: Long
+  metadata: [WebhookTargetMetadataEntry]
+  "This is the unique name of the webhook; this should include details about the data being sent, to differentiate it from other webhooks."
+  name: String
+  "The organization the webhook belongs to; this is automatically defined by the user creating the webhook."
+  organization: Org @auth(permissions : ["Org.Read"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.OrgService/Get", returnField : "org", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "orgId", childField : "id"}])
+  "The details of the user creating the webhook; this is also automatically defined during the webhook creation."
+  user: User @auth(permissions : ["User.Read.All"]) @grpc(flattenRequest : false, invoke : "mapped.cloud.api.orgs.users.UserService/Get", returnField : "user", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "userId", childField : "id"}])
+}
+
+type WebhookTargetAuth {
+  apiKey: APIKey
+  basicAuth: BasicAuth
+  noAuth: Boolean
+  oauth2ClientCredentialsFlow: OAuth2ClientCredentialsFlow
+}
+
+type WebhookTargetCloudEventBatchedContentModeConfig {
+  gracePeriod: Duration
+  maxDelay: Duration
+  maxSize: Long
+}
+
+type WebhookTargetCloudEventFilter {
+  and: [WebhookTargetCloudEventFilter]
+  not: [WebhookTargetCloudEventFilter]
+  or: [WebhookTargetCloudEventFilter]
+  sources: [String]
+  types: [CloudEventSourceType]
+}
+
+type WebhookTargetCreateResponse {
+  target: WebhookTarget
+}
+
+type WebhookTargetDeleteResponse {
+  _: String
+}
+
+type WebhookTargetEnableResponse {
+  currentEnabled: Boolean
+  id: String
+  previousEnabled: Boolean
+}
+
+type WebhookTargetEventFilter {
+  "Currently in development."
+  cloudEventFilter: WebhookTargetCloudEventFilter
+  "Input the JSON Expression for the filter input you want here."
+  jsonExpressionFilter: WebhookTargetJsonExpressionFilter
+  "Currently in development."
+  timeseriesFilter: WebhookTargetTimeseriesFilter
+}
+
+type WebhookTargetHTTPTarget {
+  auth: WebhookTargetAuth
+  hmac256: HMAC256
+  method: HTTPMethod
+  targetUri: String
+}
+
+type WebhookTargetJsonExpressionFilter {
+  jsonPathExpression: String
+}
+
+type WebhookTargetMetadataEntry {
+  key: String
+  value: String
+}
+
+type WebhookTargetTimeseriesFilter {
+  points: [String]
+}
+
+type WebhookTargetUpdateResponse {
+  target: WebhookTarget
+}
+
+type Zone implements Place & ThingContainer {
+  calendarEvents(filter: CalendarEventFilter): [CalendarEvent] @auth(permissions : ["Event.Read.All"])
+  connectors(filter: ConnectorFilterInput): [Connector] @auth(permissions : ["Connector.Read.All"]) @grpc(flattenRequest : true, invoke : "mapped.cloud.api.connectors.ConnectorService/List", returnField : "connectors", returnLookupKeyOnFailure : false) @relationMapping(mappings : [{parentField : "connectedDataSourceIdsHook", childField : "filter.id.in"}])
+  dateCreated: DateTime
+  dateUpdated: DateTime
+  description: String
+  exactType: String
+  geoshape: GeoJSON
+  hasPart: [Place] @graph(direction : OUT, edgeName : "hasPart")
+  hasPoint: [Point] @graph(direction : OUT, edgeName : "hasPoint")
+  id: String!
+  identities: [ZoneIdentityUnion]
+  isFedBy: [Thing] @graph(direction : IN, edgeName : "feeds")
+  isLocationOf: [Thing] @graph(direction : IN, edgeName : "hasLocation")
+  isPartOf: [Place] @graph(direction : IN, edgeName : "hasPart")
+  name: String
+  points(filter: PointFilter): [Point] @auth(permissions : ["Thing.Read.All"])
+  things(filter: ThingFilter): [Thing] @auth(permissions : ["Thing.Read.All"])
+  type: [String]
+}
+
+"The list of available authorization modes"
+enum AuthMode {
+  PAT
+}
+
+enum BundleState {
+  BUNDLE_STATE_ACTIVE
+  BUNDLE_STATE_ARCHIVED
+  BUNDLE_STATE_UNSPECIFIED
+}
+
+enum BusinessUserRepoTypeInput {
+  USERREPOTYPE_ADMIN
+  USERREPOTYPE_GLOBAL
+  USERREPOTYPE_UNSPECIFIED
+}
+
+enum CalendarInvitationResponse {
+  ACCEPTED
+  DECLINED
+  NONE
+  TENTATIVE
+}
+
+enum CloudEventSourceType {
+  CLOUDEVENTSOURCETYPE_UNSPECIFIED
+  TIMESERIES_POINT
+}
+
+enum CloudEventSourceTypeInput {
+  CLOUDEVENTSOURCETYPE_UNSPECIFIED
+  TIMESERIES_POINT
+}
+
+"Current state of the Connector."
+enum ConnectorState {
+  "Connector is up and running, retrieving data from the device vendor."
+  ACTIVE
+  CONFIGURING
+  CONNECTING
+  "Connector state cannot be identified, contact support@mapped.com for help."
+  CONNECTOR_STATE_UNSPECIFIED
+  "Connector was deleted, displays for audit purposes."
+  DELETED
+  "Transient state, displayed while Connector is in process of deletion."
+  DELETING
+  "Connector is in an error state, contact support@mapped.com for help."
+  ERROR_GENERAL
+  "Connector is stopped, no longer retrieving data from the device vendor, but still exists and can be restarted."
+  STOPPED
+  "Transient state, displayed while Connector is in process of stopping."
+  STOPPING
+}
+
+"Current state of the Connector."
+enum ConnectorStateInput {
+  "Connector is up and running, retrieving data from the device vendor."
+  ACTIVE
+  CONFIGURING
+  CONNECTING
+  "Connector state cannot be identified, contact support@mapped.com for help."
+  CONNECTOR_STATE_UNSPECIFIED
+  "Connector was deleted, displays for audit purposes."
+  DELETED
+  "Transient state, displayed while Connector is in process of deletion."
+  DELETING
+  "Connector is in an error state, contact support@mapped.com for help."
+  ERROR_GENERAL
+  "Connector is stopped, no longer retrieving data from the device vendor, but still exists and can be restarted."
+  STOPPED
+  "Transient state, displayed while Connector is in process of stopping."
+  STOPPING
+}
+
+enum ConnectorTypeConnectorDirection {
+  CONNECTOR_DIRECTION_UNSPECIFIED
+  DESTINATION
+  SOURCE
+}
+
+enum ConnectorTypeConnectorDirectionInput {
+  CONNECTOR_DIRECTION_UNSPECIFIED
+  DESTINATION
+  SOURCE
+}
+
+enum GatewayCourier {
+  COURIER_DHL
+  COURIER_FEDEX
+  COURIER_UNSPECIFIED
+  COURIER_UPS
+  COURIER_USPS
+}
+
+enum GatewayLifecycleState {
+  ACTIVE
+  ASSIGNED
+  CONFIGURING
+  DELIVERED
+  EXTENDED_OFFLINE
+  FIRST_BOOT
+  INVENTORY
+  LIFECYCLE_STATE_UNSPECIFIED
+  PROVISIONED
+  RMA
+  SHIPPED
+  SHIPPING_EXCEPTION
+  SUSPENDED
+  TERMINATED
+}
+
+enum GatewayLifecycleStateInput {
+  ACTIVE
+  ASSIGNED
+  CONFIGURING
+  DELIVERED
+  EXTENDED_OFFLINE
+  FIRST_BOOT
+  INVENTORY
+  LIFECYCLE_STATE_UNSPECIFIED
+  PROVISIONED
+  RMA
+  SHIPPED
+  SHIPPING_EXCEPTION
+  SUSPENDED
+  TERMINATED
+}
+
+enum GatewayModel {
+  MODEL_UG100
+  MODEL_UGCLOUD
+  MODEL_UGCONTAINER
+  MODEL_UNSPECIFIED
+}
+
+enum GatewayModelInput {
+  MODEL_UG100
+  MODEL_UGCLOUD
+  MODEL_UGCONTAINER
+  MODEL_UNSPECIFIED
+}
+
+enum GatewayRMAReason {
+  RMA_REASON_CONNECTIVITY
+  RMA_REASON_CUSTOMER_RETURN
+  RMA_REASON_HARDWAREFAILURE
+  RMA_REASON_OTHER
+  RMA_REASON_UNSPECIFIED
+}
+
+enum GatewaySIMType {
+  SIM_TYPE_CERTS_ONLY
+  SIM_TYPE_ESIM
+  SIM_TYPE_TWILIO_SUPER
+  SIM_TYPE_TWILIO_SUPER_TOB
+  SIM_TYPE_TWILIO_TOB
+  SIM_TYPE_UNSPECIFIED
+}
+
+enum GatewayShippingStatus {
+  SHIPPING_STATUS_DELIVERED
+  SHIPPING_STATUS_EXCEPTION
+  SHIPPING_STATUS_SHIPPED
+  SHIPPING_STATUS_UNSPECIFIED
+}
+
+enum GatewaySuspensionReason {
+  SUSPENSION_REASON_ACCOUNT_STATE
+  SUSPENSION_REASON_CUSTOMER_REQUEST
+  SUSPENSION_REASON_LOST_TEMPORARY
+  SUSPENSION_REASON_UNSPECIFIED
+  SUSPENSION_REASON_UNSUSPEND
+}
+
+enum GatewaySuspensionReasonInput {
+  SUSPENSION_REASON_ACCOUNT_STATE
+  SUSPENSION_REASON_CUSTOMER_REQUEST
+  SUSPENSION_REASON_LOST_TEMPORARY
+  SUSPENSION_REASON_UNSPECIFIED
+  SUSPENSION_REASON_UNSUSPEND
+}
+
+enum GatewayTerminationReason {
+  TERMINATION_DAMAGED
+  TERMINATION_FAILURE
+  TERMINATION_LOST
+  TERMINATION_REASON_ACCOUNT_STATE
+  TERMINATION_REASON_CUSTOMER_REQUEST
+  TERMINATION_REASON_UNSPECIFIED
+}
+
+enum GrantRequestType {
+  ENTIRE_BUILDINGS
+  ENTIRE_FLOORS
+  ENTIRE_SITE
+  PARTIAL_FLOORS
+  REQUESTED_UNSPECIFIED
+}
+
+enum GrantRequestTypeInput {
+  ENTIRE_BUILDINGS
+  ENTIRE_FLOORS
+  ENTIRE_SITE
+  PARTIAL_FLOORS
+  REQUESTED_UNSPECIFIED
+}
+
+enum GrantState {
+  APPROVED
+  DELETED
+  GRANTSTATE_UNSPECIFIED
+  PENDING
+  REJECTED
+}
+
+enum GrantStateInput {
+  APPROVED
+  DELETED
+  GRANTSTATE_UNSPECIFIED
+  PENDING
+  REJECTED
+}
+
+"The list of available graph edge directions"
+enum GraphEdgeDirection {
+  IN
+  OUT
+}
+
+enum HTTPMethod {
+  CONNECT
+  DELETE
+  GET
+  HEAD
+  HTTPMETHOD_UNSPECIFIED
+  OPTIONS
+  PATCH
+  POST
+  PUT
+  TRACE
+}
+
+enum HTTPMethodInput {
+  CONNECT
+  DELETE
+  GET
+  HEAD
+  HTTPMETHOD_UNSPECIFIED
+  OPTIONS
+  PATCH
+  POST
+  PUT
+  TRACE
+}
+
+enum Interval {
+  INTERVAL_CUSTOM
+  INTERVAL_EVERY_3_MONTHS
+  INTERVAL_EVERY_6_MONTHS
+  INTERVAL_EVERY_MONTH
+  INTERVAL_EVERY_YEAR
+  INTERVAL_ONE_TIME
+  INTERVAL_UNSPECIFIED
+}
+
+enum InviteStatus {
+  ACCEPTED
+  DELETED
+  EXPIRED
+  INVITE_STATUS_UNSPECIFIED
+  PENDING
+  REDEEMED
+}
+
+enum InviteStatusInput {
+  ACCEPTED
+  DELETED
+  EXPIRED
+  INVITE_STATUS_UNSPECIFIED
+  PENDING
+  REDEEMED
+}
+
+"Contains the details about the status field for a live query."
+enum LiveQueryStatus {
+  "The live query encountered an error and is not running; contact support@mapped.com for help."
+  FAILING
+  "The live query is returning an uncategorized status; contact support@mapped.com for help."
+  LIVE_QUERY_STATUS_UNSPECIFIED
+  "The live query is paused, using pauseLiveQuery. Use resumeLiveQuery to restore it to active."
+  PAUSED
+  "The live query is actively running and monitoring for changes to the defined query."
+  RUNNING
+}
+
+"Contains the details about the status field for a live query."
+enum LiveQueryStatusInput {
+  "The live query encountered an error and is not running; contact support@mapped.com for help."
+  FAILING
+  "The live query is returning an uncategorized status; contact support@mapped.com for help."
+  LIVE_QUERY_STATUS_UNSPECIFIED
+  "The live query is paused, using pauseLiveQuery. Use resumeLiveQuery to restore it to active."
+  PAUSED
+  "The live query is actively running and monitoring for changes to the defined query."
+  RUNNING
+}
+
+enum OrgProvisioningState {
+  PROVISIONING_STATE_ACCEPTED
+  PROVISIONING_STATE_COMPLETE
+  PROVISIONING_STATE_UNSPECIFIED
+}
+
+enum OrgProvisioningStateInput {
+  PROVISIONING_STATE_ACCEPTED
+  PROVISIONING_STATE_COMPLETE
+  PROVISIONING_STATE_UNSPECIFIED
+}
+
+enum OrgState {
+  ACTIVE
+  DELETED
+  ORG_STATE_UNSPECIFIED
+  PROVISIONING
+  RESERVED
+}
+
+enum OrgStateInput {
+  ACTIVE
+  DELETED
+  ORG_STATE_UNSPECIFIED
+  PROVISIONING
+  RESERVED
+}
+
+enum Permission {
+  ANAXIENRICHMENT_READWRITE_ALL
+  ANAXIENRICHMENT_READ_ALL
+  ANAXIINFERENCE_READWRITE_ALL
+  ANAXIINFERENCE_READ_ALL
+  ANAXILABEL_READ
+  ANAXILABEL_READWRITE
+  ANAXILABEL_READWRITE_ALL
+  ANAXILABEL_READ_ALL
+  ANAXIMODEL_READWRITE_ALL
+  ANAXIMODEL_READ_ALL
+  ANAXISTANDARDLABEL_READWRITE_ALL
+  ANAXISTANDARDLABEL_READ_ALL
+  BILLING_READ
+  BILLING_READWRITE
+  BILLING_READWRITE_ALL
+  BILLING_READ_ALL
+  BUSINESS_WRITE
+  CONNECTORAUTHSERVICE_READWRITE_ALL
+  CONNECTORAUTHSERVICE_READ_ALL
+  CONNECTORAUTH_ACCESS
+  CONNECTORAUTH_READWRITE_ALL
+  CONNECTORAUTH_READ_ALL
+  CONNECTOR_DESTINATION_READ
+  CONNECTOR_DESTINATION_READ_ALL
+  CONNECTOR_DESTINATION_WRITE
+  CONNECTOR_READWRITE_ALL
+  CONNECTOR_READ_ALL
+  CONNECTOR_SOURCE_READ
+  CONNECTOR_SOURCE_READ_ALL
+  CONNECTOR_SOURCE_WRITE
+  CONTRIBUTIONREQUEST_READWRITE
+  DEVICEMANUFACTURER_READWRITE_ALL
+  DEVICEMANUFACTURER_READ_ALL
+  DEVICEMODEL_READWRITE_ALL
+  DEVICEMODEL_READ_ALL
+  DEVICEPROFILE_READWRITE_ALL
+  DEVICEPROFILE_READ_ALL
+  EVENT_READ_ALL
+  GATEWAY_PIPELINE_ALL
+  GATEWAY_READWRITE_ALL
+  GATEWAY_READ_ALL
+  GRANTS_READ
+  GRANTS_READWRITE
+  GRANTS_READWRITE_ALL
+  GRANTS_READ_ALL
+  GRAPH_READWRITE_ALL
+  GRAPH_READ_ALL
+  LIVEQUERY_READ
+  LIVEQUERY_READWRITE
+  LIVEQUERY_READWRITE_ALL
+  LIVEQUERY_READ_ALL
+  MESSAGING_READ
+  MESSAGING_READWRITE
+  MESSAGING_READWRITE_ALL
+  MESSAGING_READ_ALL
+  OPENFGA_WRITE
+  ORG_READ
+  ORG_READWRITE
+  ORG_READWRITE_ALL
+  ORG_READ_ALL
+  PERMISSION_UNSPECIFIED
+  PERSONALACCESSTOKEN_READ
+  PERSONALACCESSTOKEN_READWRITE
+  PERSONALACCESSTOKEN_READWRITE_ALL
+  PERSONALACCESSTOKEN_READ_ALL
+  PERSON_READ_ALL
+  PLACE_READWRITE_ALL
+  PLACE_READ_ALL
+  SECRETS_READWRITE_ALL
+  SECRETS_READ_ALL
+  THING_READWRITE_ALL
+  THING_READ_ALL
+  USER_READ
+  USER_READWRITE
+  USER_READWRITE_ALL
+  USER_READ_ALL
+  WEBHOOKRECEIVER_READWRITE_ALL
+  WEBHOOKRECEIVER_READ_ALL
+  WEBHOOKSENDER_READWRITE_ALL
+  WEBHOOKSENDER_READ_ALL
+  WEBHOOKTARGET_READ
+  WEBHOOKTARGET_READWRITE
+  WEBHOOKTARGET_READWRITE_ALL
+  WEBHOOKTARGET_READ_ALL
+}
+
+enum PermissionInput {
+  ANAXIENRICHMENT_READWRITE_ALL
+  ANAXIENRICHMENT_READ_ALL
+  ANAXIINFERENCE_READWRITE_ALL
+  ANAXIINFERENCE_READ_ALL
+  ANAXILABEL_READ
+  ANAXILABEL_READWRITE
+  ANAXILABEL_READWRITE_ALL
+  ANAXILABEL_READ_ALL
+  ANAXIMODEL_READWRITE_ALL
+  ANAXIMODEL_READ_ALL
+  ANAXISTANDARDLABEL_READWRITE_ALL
+  ANAXISTANDARDLABEL_READ_ALL
+  BILLING_READ
+  BILLING_READWRITE
+  BILLING_READWRITE_ALL
+  BILLING_READ_ALL
+  BUSINESS_WRITE
+  CONNECTORAUTHSERVICE_READWRITE_ALL
+  CONNECTORAUTHSERVICE_READ_ALL
+  CONNECTORAUTH_ACCESS
+  CONNECTORAUTH_READWRITE_ALL
+  CONNECTORAUTH_READ_ALL
+  CONNECTOR_DESTINATION_READ
+  CONNECTOR_DESTINATION_READ_ALL
+  CONNECTOR_DESTINATION_WRITE
+  CONNECTOR_READWRITE_ALL
+  CONNECTOR_READ_ALL
+  CONNECTOR_SOURCE_READ
+  CONNECTOR_SOURCE_READ_ALL
+  CONNECTOR_SOURCE_WRITE
+  CONTRIBUTIONREQUEST_READWRITE
+  DEVICEMANUFACTURER_READWRITE_ALL
+  DEVICEMANUFACTURER_READ_ALL
+  DEVICEMODEL_READWRITE_ALL
+  DEVICEMODEL_READ_ALL
+  DEVICEPROFILE_READWRITE_ALL
+  DEVICEPROFILE_READ_ALL
+  EVENT_READ_ALL
+  GATEWAY_PIPELINE_ALL
+  GATEWAY_READWRITE_ALL
+  GATEWAY_READ_ALL
+  GRANTS_READ
+  GRANTS_READWRITE
+  GRANTS_READWRITE_ALL
+  GRANTS_READ_ALL
+  GRAPH_READWRITE_ALL
+  GRAPH_READ_ALL
+  LIVEQUERY_READ
+  LIVEQUERY_READWRITE
+  LIVEQUERY_READWRITE_ALL
+  LIVEQUERY_READ_ALL
+  MESSAGING_READ
+  MESSAGING_READWRITE
+  MESSAGING_READWRITE_ALL
+  MESSAGING_READ_ALL
+  OPENFGA_WRITE
+  ORG_READ
+  ORG_READWRITE
+  ORG_READWRITE_ALL
+  ORG_READ_ALL
+  PERMISSION_UNSPECIFIED
+  PERSONALACCESSTOKEN_READ
+  PERSONALACCESSTOKEN_READWRITE
+  PERSONALACCESSTOKEN_READWRITE_ALL
+  PERSONALACCESSTOKEN_READ_ALL
+  PERSON_READ_ALL
+  PLACE_READWRITE_ALL
+  PLACE_READ_ALL
+  SECRETS_READWRITE_ALL
+  SECRETS_READ_ALL
+  THING_READWRITE_ALL
+  THING_READ_ALL
+  USER_READ
+  USER_READWRITE
+  USER_READWRITE_ALL
+  USER_READ_ALL
+  WEBHOOKRECEIVER_READWRITE_ALL
+  WEBHOOKRECEIVER_READ_ALL
+  WEBHOOKSENDER_READWRITE_ALL
+  WEBHOOKSENDER_READ_ALL
+  WEBHOOKTARGET_READ
+  WEBHOOKTARGET_READWRITE
+  WEBHOOKTARGET_READWRITE_ALL
+  WEBHOOKTARGET_READ_ALL
+}
+
+enum PriceType {
+  PRICE_TYPE_METERED
+  PRICE_TYPE_ONE_TIME
+  PRICE_TYPE_PLATFORM
+  PRICE_TYPE_PREPAID_METERED
+  PRICE_TYPE_UNSPECIFIED
+}
+
+enum ProductType {
+  PRODUCT_TYPE_ONE_TIME
+  PRODUCT_TYPE_RECURRING
+  PRODUCT_TYPE_UNSPECIFIED
+}
+
+enum Role {
+  ADMIN
+  DESTINATION_CONNECTOR_MANAGERS
+  EXPLORER
+  ROLE_UNSPECIFIED
+}
+
+enum RoleInput {
+  ADMIN
+  DESTINATION_CONNECTOR_MANAGERS
+  EXPLORER
+  ROLE_UNSPECIFIED
+}
+
+enum SystemTypeKey {
+  AIR_QUALITY_MONITORING_SYSTEM
+  CALENDAR_SYSTEM
+  ELECTRICAL_SYSTEM
+  ELECTRICITY_SYSTEM
+  ELEVATOR_SYSTEM
+  GAS_SYSTEM
+  HVAC_SYSTEM
+  LIGHTING_SYSTEM
+  SAFETY_SYSTEM
+  SECURITY_SYSTEM
+  SEWAGE_SYSTEM
+  SPATIAL_INTELLIGENCE_SYSTEM
+  SYSTEMTYPE_UNKNOWN
+  SYSTEM_TYPE_KEY_UNSPECIFIED
+  TELECONFERENCE_SYSTEM
+  WATER_SYSTEM
+  WEATHER_SYSTEM
+}
+
+enum SystemTypeKeyInput {
+  AIR_QUALITY_MONITORING_SYSTEM
+  CALENDAR_SYSTEM
+  ELECTRICAL_SYSTEM
+  ELECTRICITY_SYSTEM
+  ELEVATOR_SYSTEM
+  GAS_SYSTEM
+  HVAC_SYSTEM
+  LIGHTING_SYSTEM
+  SAFETY_SYSTEM
+  SECURITY_SYSTEM
+  SEWAGE_SYSTEM
+  SPATIAL_INTELLIGENCE_SYSTEM
+  SYSTEMTYPE_UNKNOWN
+  SYSTEM_TYPE_KEY_UNSPECIFIED
+  TELECONFERENCE_SYSTEM
+  WATER_SYSTEM
+  WEATHER_SYSTEM
+}
+
+enum TimeseriesAggPeriodInput {
+  AGG_PERIOD_UNSPECIFIED
+  DAY
+  HOUR
+  MINUTE
+}
+
+enum TimeseriesNumericalException {
+  INFINITY
+  NAN
+  NEGATIVE_INFINITY
+  NUMERICAL_EXCEPTION_UNSPECIFIED
+}
+
+enum WebhookTargetCloudEventContentMode {
+  BATCHED
+  BINARY
+  CLOUDEVENTCONTENTMODE_UNSPECIFIED
+  STRUCTURED
+}
+
+enum WebhookTargetCloudEventContentModeInput {
+  BATCHED
+  BINARY
+  CLOUDEVENTCONTENTMODE_UNSPECIFIED
+  STRUCTURED
+}
+
+enum WebhookTargetEventFilterTypeInput {
+  CLOUDEVENT
+  EVENTFILTERTYPE_UNSPECIFIED
+  JSONEXPRESSION
+  TIMESERIES
+}
+
+enum WebhookTargetTargetTypeInput {
+  HTTP
+  TARGETTYPE_UNSPECIFIED
+}
+
+"An RFC-3339 compliant DateTime Scalar"
+scalar DateTime
+
+"Geodata in JSON format"
+scalar GeoJSON
+
+"GraphQL JSON"
+scalar GraphQLJSON
+
+"JSON-LD is a lightweight Linked Data format."
+scalar JSONLD
+
+"JSON Schema is a powerful type for validating the structure of JSON data"
+scalar JSONSchema
+
+"A 64-bit signed integer"
+scalar Long
+
+scalar Map
+
+"A Url scalar"
+scalar Url
+
+input APIKeyInput {
+  apiKey: String
+  keyName: String
+  passedAs: String
+}
+
+input AddressFilter {
+  and: [AddressFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  id: IDFilterExpressionInput
+  not: AddressFilter
+  or: [AddressFilter]
+}
+
+input AddressMutationInput {
+  countryName: String
+  id: String
+  locality: String
+  postalCode: String
+  region: String
+  streetAddress: String
+  type: [String]
+}
+
+input BasicAuthInput {
+  password: String
+  username: String
+}
+
+input BoolFilterExpressionInput {
+  eq: Boolean
+  isDefined: Boolean
+}
+
+input BuildingCreateRequestInput {
+  building: BuildingMutationInput
+}
+
+input BuildingDeleteRequestInput {
+  id: String
+}
+
+"Contains the input values needed to filter building queries."
+input BuildingFilter {
+  "Used to combine multiple filter criteria."
+  and: [BuildingFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: BuildingFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [BuildingFilter]
+}
+
+input BuildingMutationInput {
+  address: AddressMutationInput
+  geoshape: GeoJSON @deprecated(reason : "No longer supported")
+  id: String
+  name: String
+  siteId: String
+}
+
+input BuildingUpdateRequestInput {
+  building: BuildingMutationInput
+}
+
+input BusinessDoesOrgExistRequestInput {
+  orgId: String
+}
+
+input BusinessDoesOrgFeatureExistRequestInput {
+  feature: String
+  orgId: String
+}
+
+input BusinessDoesOrgHaveAccessToPlanRequestInput {
+  orgId: String
+  plan: String
+  planProvider: String
+}
+
+input BusinessDoesOrgPermissionExistRequestInput {
+  orgId: String
+  permission: String
+}
+
+input BusinessDoesOrgPlanExistRequestInput {
+  orgId: String
+  plan: String
+}
+
+input BusinessDoesOrgPlanGroupExistRequestInput {
+  orgId: String
+  planProvider: String
+}
+
+input BusinessDoesOrgPlanGroupPlanExistRequestInput {
+  orgId: String
+  plan: String
+  planProvider: String
+}
+
+input BusinessDoesOrgUserExistRequestInput {
+  orgId: String
+  user: BusinessUserInput
+}
+
+input BusinessDoesPlanFeatureExistRequestInput {
+  feature: String
+  plan: String
+}
+
+input BusinessDoesPlanProviderExistRequestInput {
+  planProvider: String
+}
+
+input BusinessDoesPlanProviderPlanExistRequestInput {
+  plan: String
+  planProvider: String
+}
+
+input BusinessDoesRoleGroupExistRequestInput {
+  orgId: String
+  roleGroup: String
+}
+
+input BusinessDoesRoleGroupPermissionExistRequestInput {
+  orgId: String
+  permission: String
+  roleGroup: String
+}
+
+input BusinessDoesRoleGroupRoleExistRequestInput {
+  orgId: String
+  role: String
+  roleGroup: String
+}
+
+input BusinessDoesRoleGroupUserExistRequestInput {
+  orgId: String
+  roleGroup: String
+  user: BusinessUserInput
+}
+
+input BusinessDoesRolePermissionExistRequestInput {
+  permission: String
+  role: String
+}
+
+input BusinessDoesUserExistRequestInput {
+  user: BusinessUserInput
+  userRepo: BusinessUserRepoTypeInput
+}
+
+input BusinessDoesUserPermissionExistRequestInput {
+  orgId: String
+  permission: String
+  user: BusinessUserInput
+}
+
+input BusinessUserInput {
+  integrityId: String
+  userId: String
+}
+
+input CalendarEventFilter {
+  and: [CalendarEventFilter]
+  endTime: DateTimeFilterExpressionInput
+  hasInviteeEmail: StringFilterExpressionInput
+  id: IDFilterExpressionInput
+  not: CalendarEventFilter
+  or: [CalendarEventFilter]
+  startTime: DateTimeFilterExpressionInput
+}
+
+input CalendarInvitationFilter {
+  and: [CalendarInvitationFilter]
+  id: IDFilterExpressionInput
+  not: CalendarInvitationFilter
+  or: [CalendarInvitationFilter]
+  response: CalendarInvitationResponseFilterExpressionInput
+}
+
+input CalendarInvitationResponseFilterExpressionInput {
+  eq: CalendarInvitationResponse
+  in: [CalendarInvitationResponse]
+}
+
+"Contains the input values needed to create an Connector auth."
+input ConnectorAuthCreateRequestInput {
+  secret: ConnectorAuthRequestSecretInput
+}
+
+"Contains the input values needed to delete Connector auth."
+input ConnectorAuthDeleteRequestInput {
+  id: String
+}
+
+input ConnectorAuthInput {
+  created: DateTime
+  id: String
+  lastAccessed: DateTime
+  updated: DateTime
+}
+
+input ConnectorAuthRequestSecretInput {
+  refreshToken: ConnectorServicesRefreshTokenInput
+  staticToken: ConnectorAuthStaticTokenInput
+  usernamePassword: ConnectorAuthUsernamePasswordInput
+}
+
+input ConnectorAuthStaticTokenInput {
+  token: String
+}
+
+"Contains the input values needed to update Connector auth."
+input ConnectorAuthUpdateRequestInput {
+  connectorAuth: ConnectorAuthInput
+  secret: ConnectorAuthRequestSecretInput
+}
+
+input ConnectorAuthUsernamePasswordInput {
+  password: String
+  username: String
+}
+
+"Contains the input values needed to create a Connector."
+input ConnectorCreateRequestInput {
+  connector: ConnectorInput
+}
+
+"Contains the input values needed to delete a Connector."
+input ConnectorDeleteRequestInput {
+  id: String
+}
+
+"Contains the input values needed to filter Connector queries."
+input ConnectorFilterInput {
+  "Used if you want to filter by a connectorType instead of a specific Connector installation."
+  connectorTypeId: IDFilterExpressionInput
+  direction: ConnectorTypeConnectorDirectionFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+}
+
+"Contains the details about a Connector."
+input ConnectorInput {
+  "Any settings required in order to create a Connector will be provided here."
+  config: JSONSchema
+  "Random string that identifies the current Connector configuration; if you need to update the configuration, you will need to include the current configHash value in the mutation request."
+  configHash: String
+  "The unique id of the connector type."
+  connectorTypeId: String
+  "Timestamp for the Connector's creation."
+  created: DateTime
+  direction: ConnectorTypeConnectorDirectionInput
+  "The unique id of a Connector."
+  id: String
+  lastSeen: DateTime
+  lastUpdatedBy: String
+  "The name of a Connector you provided when setting it up for your org."
+  name: String
+  "Lists the state of a Connector, such as ACTIVE or STOPPED."
+  state: ConnectorStateInput
+  "Currently provides additional information about a Connector in an ERROR_GENERAL state."
+  stateDetails: String
+  "Timestamp when a connector was last updated."
+  updated: DateTime
+  userId: String
+  "This is an internal-only field; the value(s) included in this field may be requested by support for troubleshooting purposes, but otherwise holds no value for external developers."
+  workflowId: String
+}
+
+input ConnectorRequestCreateRequestInput {
+  connectorTypeId: String
+}
+
+input ConnectorRestartRequestInput {
+  id: String
+}
+
+input ConnectorServicesRefreshTokenInput {
+  refreshToken: String
+  serviceName: String
+}
+
+input ConnectorStartRequestInput {
+  id: String
+}
+
+input ConnectorStopRequestInput {
+  id: String
+}
+
+input ConnectorTypeConnectorDirectionFilterExpressionInput {
+  eq: ConnectorTypeConnectorDirectionInput
+  in: [ConnectorTypeConnectorDirectionInput]
+}
+
+"Used to filter the Connector type results."
+input ConnectorTypeFilterInput {
+  "The ID of the Connector type."
+  connectorTypeId: IDFilterExpressionInput
+  "The description of the Connector type."
+  description: IDFilterExpressionInput
+  direction: ConnectorTypeConnectorDirectionFilterExpressionInput
+  "The name of the Connector type."
+  name: IDFilterExpressionInput
+  "The version of the Connector type."
+  version: IDFilterExpressionInput
+}
+
+input ConnectorUpdateRequestInput {
+  connector: ConnectorInput
+}
+
+input ConnectorUpsertConfigRequestInput {
+  config: JSONSchema
+  configHash: String
+  id: String
+}
+
+input ContributionRequestCreateRequestInput {
+  contributionRequest: ContributionRequestInput
+}
+
+input ContributionRequestInput {
+  id: String
+  properties: ContributionRequestPropertyValuesInput
+  target: ContributionRequestTargetEntityInput
+}
+
+input ContributionRequestPropertyValuesInput {
+  additionalName: String
+  address: String
+  attachment: [String]
+  callInfo: String
+  countryName: String
+  description: String
+  deviceModelId: String
+  elevation: Float
+  endTime: DateTime
+  exactType: String
+  familyName: String
+  firmwareVersion: String
+  geoshape: GeoJSON
+  givenName: String
+  hostname: String
+  iCalUid: String
+  image: String
+  ipv4Address: [String]
+  ipv6Address: [String]
+  level: Int
+  locality: String
+  macAddress: String
+  maxLimit: Float
+  maxOccupancy: Int
+  minLimit: Float
+  name: String
+  postalCode: String
+  region: String
+  response: String
+  seeAlso: String
+  serialNumber: String
+  stateTexts: [String]
+  streetAddress: String
+  systemType: [String]
+  type: [String]
+  unit: String
+  valueType: String
+}
+
+input ContributionRequestTargetEntityInput {
+  id: String
+}
+
+input DateTimeFilterExpressionInput {
+  eq: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime]
+  lt: DateTime
+  lte: DateTime
+}
+
+input DurationInput {
+  nanos: Int
+  seconds: Long
+}
+
+input FloorCreateRequestInput {
+  floor: FloorMutationInput
+}
+
+input FloorDeleteRequestInput {
+  id: String
+}
+
+"Contains the input values needed to filter floor queries."
+input FloorFilter {
+  "Used to combine multiple filter criteria."
+  and: [FloorFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)"
+  id: StringFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: FloorFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [FloorFilter]
+}
+
+input FloorMutationInput {
+  buildingId: String
+  geoshape: GeoJSON
+  id: String
+  level: Int
+  name: String
+  type: [String]
+}
+
+input FloorUpdateRequestInput {
+  floor: FloorMutationInput
+}
+
+input GRPCRequestOptions {
+  "Request Timeout in milliseconds"
+  requestTimeout: Int
+}
+
+"Contains the input values needed to assign a gateway."
+input GatewayAssignRequestInput {
+  assignment: GatewayAssignmentDetailsInput
+  gatewayId: String
+}
+
+input GatewayAssignmentDetailsInput {
+  assignmentTime: DateTime
+  physicalPlaceId: String
+  preciseGeoLocation: GeoJSON
+  servesPlaceIds: [String]
+  servesSystemTypes: [SystemTypeKeyInput]
+  uniqueName: String
+}
+
+"Contains the input values needed to filter gateway queries."
+input GatewayFilterInput {
+  "Used to combine multiple filter criteria."
+  and: [GatewayFilterInput]
+  deviceId: IDFilterExpressionInput
+  gatewayId: IDFilterExpressionInput
+  iccid: StringFilterExpressionInput
+  imei: StringFilterExpressionInput
+  lanMac: StringFilterExpressionInput
+  mappedModel: GatewayModelFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: [GatewayFilterInput]
+  "Used to return results that match at least one of the defined criteria."
+  or: [GatewayFilterInput]
+  physicalPlaceId: IDFilterExpressionInput
+  serialNumber: StringFilterExpressionInput
+  servesPlaceIds: StringArrayFilterExpressionInput
+  servesSystemTypes: GatewaySystemTypeFilterExpressionInput
+  state: GatewayLifecycleStateFilterExpressionInput
+  stateTime: TimestampFilterExpressionInput
+  "Search by the gateway's name, either an exact match, in a defined set or by a partial match."
+  uniqueName: StringFilterExpressionInput
+}
+
+"Currently not used, placeholder."
+input GatewayGenerateContainerSIDsRequestInput {
+  "NOT USED"
+  _: String
+}
+
+input GatewayLifecycleStateFilterExpressionInput {
+  eq: GatewayLifecycleStateInput
+  in: [GatewayLifecycleStateInput]
+}
+
+input GatewayModelFilterExpressionInput {
+  eq: GatewayModelInput
+  in: [GatewayModelInput]
+}
+
+input GatewayNoteInput {
+  note: String
+  time: DateTime
+}
+
+"Currently not used, placeholder."
+input GatewayRegisterContainerRequestInput {
+  availableCertificatePem: String
+  signingCertificatePem: String
+}
+
+"Contains the input values needed to suspend a gateway."
+input GatewaySuspendRequestInput {
+  details: GatewaySuspensionDetailsInput
+  gatewayId: String
+}
+
+input GatewaySuspensionDetailsInput {
+  notesCustomer: [GatewayNoteInput]
+  reason: GatewaySuspensionReasonInput
+  suspensionTime: DateTime
+}
+
+input GatewaySystemTypeFilterExpressionInput {
+  eq: SystemTypeKeyInput
+  in: [SystemTypeKeyInput]
+}
+
+"Contains the input values needed to create an access grant."
+input GrantCreateRequestInput {
+  requestedAddress: PostalAddressInput
+  requests: [GrantRequestInput]
+}
+
+"Contains the input values needed to delete an access grant."
+input GrantDeleteRequestInput {
+  grantorNote: String
+  ids: [String]
+  maintainChain: Boolean
+}
+
+"Contains the input values needed to filter grant queries."
+input GrantFilterInput {
+  "Used to combine multiple filter criteria."
+  and: [GrantFilterInput]
+  grantedIds: IDFilterExpressionInput
+  grantedTypes: SystemTypeFilterExpressionInput
+  granteeUserId: IDFilterExpressionInput
+  grantorUserId: IDFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: [GrantFilterInput]
+  "Used to return results that match at least one of the defined criteria."
+  or: [GrantFilterInput]
+  state: GrantStateFilterExpressionInput
+}
+
+input GrantPlacesAndTypesInput {
+  grantedIds: [String]
+  grantedSystemTypes: [SystemTypeKeyInput]
+}
+
+input GrantRequestInput {
+  requestNote: String
+  requestType: GrantRequestTypeInput
+  systemTypes: [SystemTypeKeyInput]
+}
+
+input GrantStateFilterExpressionInput {
+  eq: GrantStateInput
+  in: [GrantStateInput]
+}
+
+"Contains the input values needed to update an access grant."
+input GrantUpdateRequestInput {
+  grantedPlacesAndTypes: [GrantPlacesAndTypesInput]
+  grantorNote: String
+  id: String
+  requests: [GrantRequestInput]
+  state: GrantStateInput
+}
+
+input GranularInput {
+  add: [MetadataRecordInput]
+  remove: [MetadataRecordInput]
+  removeAll: [String]
+}
+
+input HMAC256Input {
+  signingKeys: [String]
+}
+
+input HTTPMethodWrapperInput {
+  value: HTTPMethodInput
+}
+
+"Used as the input control for the filter, determining if you're looking for a single result or multiple results."
+input IDFilterExpressionInput {
+  "Use this field to filter for a single, specific ID."
+  eq: String
+  "Use this field to return results for all IDs present in a set, like [ID12345, ID67890]."
+  in: [String]
+}
+
+input InviteCreateRequestInput {
+  invite: InviteInput
+  skipSendEmail: Boolean
+}
+
+input InviteDeleteRequestInput {
+  id: String
+}
+
+input InviteFilterInput {
+  and: [InviteFilterInput]
+  email: StringFilterExpressionInput
+  inviteId: IDFilterExpressionInput
+  not: [InviteFilterInput]
+  or: [InviteFilterInput]
+  state: InviteStatusFilterExpressionInput
+}
+
+"Contains the details about a user invite."
+input InviteInput {
+  "This timestamp represents the date the invite was created."
+  created: DateTime
+  "The email of the user receiving the invite."
+  email: String
+  "The expiration of the invite; once an invite expires, it cannot be accepted any longer."
+  expiration: DateTime
+  "The id of the invite itself."
+  id: String
+  "The id of the user that is created after accepting the invite."
+  inviterUserId: String
+  "The role or roles assigned to the user when they accept the invite, such as ADMIN."
+  roles: [RoleInput]
+  "The current status of the invite, such as PENDING or ACCEPTED."
+  status: InviteStatusInput
+}
+
+input InviteStatusFilterExpressionInput {
+  eq: InviteStatusInput
+  in: [InviteStatusInput]
+}
+
+input InviteUpdateRequestInput {
+  invite: InviteInput
+}
+
+input LeaseFilter {
+  and: [LeaseFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  not: LeaseFilter
+  or: [LeaseFilter]
+}
+
+input LiveQueryCreateRequestInput {
+  liveQuery: LiveQueryInput
+}
+
+input LiveQueryDeleteRequestInput {
+  id: String
+}
+
+input LiveQueryFilterInput {
+  and: [LiveQueryFilterInput]
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  not: [LiveQueryFilterInput]
+  or: [LiveQueryFilterInput]
+  status: LiveQueryStatusFilterExpressionInput
+}
+
+"Contains all the detals about a live query."
+input LiveQueryInput {
+  "This timestamp represents the date the live query was created."
+  dateCreated: DateTime
+  "This timestamp represents the date the lie query was last updated."
+  dateUpdated: DateTime
+  "The unique id of the live query."
+  id: String
+  "This timestamp represents the last time the live query encountered an error."
+  lastErrorDate: DateTime
+  "This timestamp represents the date for the most recent live query result."
+  lastResultDate: DateTime
+  "The unique name of the live query."
+  name: String
+  "The query being run by the live query, i.e. the request being made to the Mapped API."
+  query: String
+  "This identifies whether the live query is currently RUNNING, PAUSED, FAILED or LIVE_QUERY_STATUS_UNSPECIFIED."
+  status: LiveQueryStatusInput
+  variables: GraphQLJSON
+}
+
+input LiveQueryPauseRequestInput {
+  id: String
+}
+
+input LiveQueryResumeRequestInput {
+  id: String
+}
+
+input LiveQueryStatusFilterExpressionInput {
+  eq: LiveQueryStatusInput
+  in: [LiveQueryStatusInput]
+}
+
+input LiveQueryUpdateInput {
+  id: String
+  name: String
+}
+
+input LiveQueryUpdateRequestInput {
+  liveQuery: LiveQueryUpdateInput
+}
+
+input MetadataRecordInput {
+  key: String
+  value: String
+}
+
+input MetadataUpdateInput {
+  granular: GranularInput
+  replace: MetadataValueInput
+}
+
+input MetadataValueInput {
+  values: [MetadataRecordInput]
+}
+
+input NodesMapping {
+  "GRPC field name in JSON format. You can use dot as a delimiter for nested fields. For example: filter.id.in"
+  childField: String!
+  "Parent field (GraphQL source)"
+  parentField: String!
+}
+
+input OAuth2ClientCredentialsFlowInput {
+  clientId: String
+  clientSecret: String
+  headerPrefix: String
+  scope: String
+  tokenEndpoint: String
+}
+
+input OrgGranularInput {
+  id: String
+  metadata: MetadataUpdateInput
+  name: String
+  provisioningState: OrgProvisioningStateWrapperInput
+  state: OrgStateWrapperInput
+  stripeCustomerId: String
+}
+
+"Contains the details about a org."
+input OrgInput {
+  "Timestamp for the org creation."
+  created: DateTime
+  "The unique ID of the organization."
+  id: String
+  metadata: [MetadataRecordInput]
+  "The name of the organization."
+  name: String
+  provisioningState: OrgProvisioningStateInput
+  state: OrgStateInput
+  stripeCustomerId: String
+  updated: DateTime
+}
+
+input OrgProvisioningStateWrapperInput {
+  value: OrgProvisioningStateInput
+}
+
+input OrgRemoveOrgUserAsyncRequestInput {
+  orgUser: OrgUserInput
+}
+
+input OrgStateWrapperInput {
+  value: OrgStateInput
+}
+
+"Contains the input values needed to update an organization."
+input OrgUpdateRequestInput {
+  "Contains the input values for the org details, such as name and admin contact."
+  org: OrgInput
+}
+
+input OrgUpdateV2RequestInput {
+  org: OrgGranularInput
+}
+
+input OrgUserInput {
+  orgId: String
+  userId: String
+}
+
+input PermissionFilterExpressionInput {
+  eq: PermissionInput
+  in: [PermissionInput]
+}
+
+input PersonFilter {
+  and: [PersonFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  email: StringFilterExpressionInput
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  not: PersonFilter
+  or: [PersonFilter]
+}
+
+"Contains the input values needed to create a token."
+input PersonalAccessTokenCreateRequestInput {
+  "Contains the input values for the token details, such as name and permissions."
+  pat: PersonalAccessTokenInput
+}
+
+"Contains the input values needed to delete a token."
+input PersonalAccessTokenDeleteRequestInput {
+  "Provide the id of the token here."
+  id: String
+}
+
+"Contains the input values needed to filter token queries."
+input PersonalAccessTokenFilterInput {
+  "Used to combine multiple filter criteria."
+  and: [PersonalAccessTokenFilterInput]
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: [PersonalAccessTokenFilterInput]
+  "Used to return results that match at least one of the defined criteria."
+  or: [PersonalAccessTokenFilterInput]
+  permissions: PermissionFilterExpressionInput
+  userId: IDFilterExpressionInput
+}
+
+"Contains the details about a personal access token."
+input PersonalAccessTokenInput {
+  "Timestamp of the token creation."
+  created: DateTime
+  "The unique ID of the access token."
+  id: String
+  integrityId: String
+  "The last time the token was used."
+  lastExchanged: DateTime
+  "The name assigned to the access token."
+  name: String
+  "The available permissions / scopes for the token, such as THING_READ_ALL"
+  permissions: [PermissionInput]
+  "Timestamp the token was last updated, including when permissions were added or removed."
+  updated: DateTime
+  "The user the token belongs to."
+  userId: String
+}
+
+"Contains the input values needed to update a token."
+input PersonalAccessTokenUpdateRequestInput {
+  "Contains the input values for the token details, such as name and permissions."
+  pat: PersonalAccessTokenInput
+}
+
+input PlaceFilter {
+  and: [PlaceFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  exactType: StringFilterExpressionInput
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  not: PlaceFilter
+  or: [PlaceFilter]
+  type: StringArrayFilterExpressionInput
+}
+
+"Contains the input values needed to filter point queries."
+input PointFilter {
+  "Used to combine multiple filter criteria."
+  and: [PointFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  exactType: StringFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  mappingKey: StringFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: PointFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [PointFilter]
+  "Used to filter on a class or subclass of the point, like \"Alarm\" and \"TemperatureAlarm\"."
+  type: StringArrayFilterExpressionInput
+}
+
+input PostalAddressInput {
+  addressLines: [String]
+  administrativeArea: String
+  languageCode: String
+  locality: String
+  organization: String
+  postalCode: String
+  recipients: [String]
+  regionCode: String
+  revision: Int
+  sortingCode: String
+  sublocality: String
+}
+
+input SimpleBoolFilterExpressionInput {
+  eq: Boolean
+}
+
+input SiteCreateRequestInput {
+  site: SiteMutationInput
+}
+
+input SiteDeleteRequestInput {
+  id: String
+}
+
+"Contains the input values needed to filter site queries."
+input SiteFilter {
+  "Used to combine multiple filter criteria."
+  and: [SiteFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: SiteFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [SiteFilter]
+}
+
+input SiteMutationInput {
+  geoshape: GeoJSON @deprecated(reason : "No longer supported")
+  id: String
+  name: String
+}
+
+input SiteUpdateRequestInput {
+  site: SiteMutationInput
+}
+
+input SpaceCreateRequestInput {
+  space: SpaceMutationInput
+}
+
+input SpaceDeleteRequestInput {
+  id: String
+}
+
+"Contains the input values needed to filter space queries."
+input SpaceFilter {
+  "Used to combine multiple filter criteria."
+  and: [SpaceFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: SpaceFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [SpaceFilter]
+  type: StringArrayFilterExpressionInput
+}
+
+input SpaceMutationInput {
+  exactType: [String]
+  floorId: String
+  geoshape: GeoJSON
+  id: String
+  name: String
+  parentSpaceId: String
+}
+
+input SpaceUpdateRequestInput {
+  space: SpaceMutationInput
+}
+
+input StringArrayFilterExpressionInput {
+  eq: String
+  in: [String]
+  ne: String
+}
+
+input StringArrayUpdateInput {
+  granular: GranularInput
+  replace: StringArrayValueInput
+}
+
+input StringArrayValueInput {
+  values: [String]
+}
+
+input StringFilterExpressionInput {
+  contains: String
+  eq: String
+  in: [String]
+  ne: String
+}
+
+input SystemTypeFilterExpressionInput {
+  eq: SystemTypeKeyInput
+  in: [SystemTypeKeyInput]
+}
+
+"Contains the input values needed to filter thing queries."
+input ThingFilter {
+  "Used to combine multiple filter criteria."
+  and: [ThingFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  exactType: StringFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: StringFilterExpressionInput
+  isVirtual: SimpleBoolFilterExpressionInput
+  mappingKey: StringFilterExpressionInput
+  name: StringFilterExpressionInput
+  "Used to omit a specific result or results from the response."
+  not: ThingFilter
+  "Used to return results that match at least one of the defined criteria."
+  or: [ThingFilter]
+  "Used to filter on a specific class or subclass of a thing, like HVAC and AHU."
+  type: StringArrayFilterExpressionInput
+}
+
+input TimestampFilterExpressionInput {
+  eq: DateTime
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+}
+
+"Contains the input values needed to filter unit queries."
+input UnitFilterInput {
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  id: IDFilterExpressionInput
+}
+
+"Contains the input values needed to update a user's assigned role."
+input UserAssignRoleRequestInput {
+  "Provide the role you want to assign to the user here."
+  role: RoleInput
+  "Provide the id of the intended user here."
+  userId: String
+}
+
+"Contains the input values needed to create a new user."
+input UserCreateRequestInput {
+  "Accepts 'true' or 'false' - when set to true, the user will not receive the invite email, which is best practice if you intend to verify their email programmatically in the 'user' field."
+  skipInviteEmail: Boolean
+  "Define a temporary password for the user; once they log in with the temp password, they will be prompted to change it."
+  temporaryPassword: String
+  "Contains the input values for the user details, such as name, email and role."
+  user: UserInput
+}
+
+"Contains the input values needed to filter user queries."
+input UserFilterInput {
+  "Used to filter on the user's email, either an exact match, in a defined set or by a partial match."
+  email: StringFilterExpressionInput
+  "Search by the user's name, either an exact match, in a defined set or by a partial match."
+  name: StringFilterExpressionInput
+  "Used to filter for a specific ID or IDs (refer to IDFilterExpressionInput for input options)."
+  userId: IDFilterExpressionInput
+}
+
+"Contains the details about a user."
+input UserInput {
+  "The timestamp of the user creation."
+  created: DateTime
+  "The user's email."
+  email: String
+  "True or False, whether the user has verified their email yet."
+  emailVerified: Boolean
+  "The unique ID of the user."
+  id: String
+  lastLogin: DateTime
+  loginsCount: Long
+  "The name of a user - this will be the full name, first and last."
+  name: String
+  "The user's nickname (often just the first name of the user)."
+  nickname: String @deprecated(reason : "No longer supported")
+  "Lists the user's roles, such as ADMIN or EXPLORER."
+  roles: [RoleInput]
+  "Timestamp when one or more user details were last updated."
+  updated: DateTime
+}
+
+input UserRemoveOrgMembershipRequestInput {
+  id: String
+  orgId: String
+}
+
+"Contains the input values needed to remove a role from a user."
+input UserRemoveRoleRequestInput {
+  "Provide the role you want to remove from the user here."
+  role: RoleInput
+  "Provide the id of the intended user here."
+  userId: String
+}
+
+"Contains the input values needed to update a user."
+input UserUpdateRequestInput {
+  "Contains the input values for the user details, such as name, email and role."
+  user: UserInput
+}
+
+input WebhookTargetAuthInput {
+  apiKey: APIKeyInput
+  basicAuth: BasicAuthInput
+  noAuth: Boolean
+  oauth2ClientCredentialsFlow: OAuth2ClientCredentialsFlowInput
+}
+
+input WebhookTargetCloudEventBatchedContentModeConfigInput {
+  gracePeriod: DurationInput
+  maxDelay: DurationInput
+  maxSize: Long
+}
+
+input WebhookTargetCloudEventContentModeWrapperInput {
+  value: WebhookTargetCloudEventContentModeInput
+}
+
+input WebhookTargetCloudEventFilterInput {
+  and: [WebhookTargetCloudEventFilterInput]
+  not: [WebhookTargetCloudEventFilterInput]
+  or: [WebhookTargetCloudEventFilterInput]
+  sources: [String]
+  types: [CloudEventSourceTypeInput]
+}
+
+input WebhookTargetCreateInput {
+  batchedContentModeConfig: WebhookTargetCloudEventBatchedContentModeConfigInput
+  contentMode: WebhookTargetCloudEventContentModeInput
+  enabled: Boolean
+  eventFilters: WebhookTargetEventFilterInput
+  httpTarget: WebhookTargetHTTPTargetInput
+  maxRetry: Long
+  name: String
+}
+
+input WebhookTargetCreateRequestInput {
+  target: WebhookTargetCreateInput
+}
+
+input WebhookTargetDeleteRequestInput {
+  id: String
+}
+
+input WebhookTargetEnableRequestInput {
+  enable: Boolean
+  id: String
+}
+
+input WebhookTargetEventFilterInput {
+  "Currently in development."
+  cloudEventFilter: WebhookTargetCloudEventFilterInput
+  "Input the JSON Expression for the filter input you want here."
+  jsonExpressionFilter: WebhookTargetJsonExpressionFilterInput
+  "Currently in development."
+  timeseriesFilter: WebhookTargetTimeseriesFilterInput
+}
+
+input WebhookTargetEventFilterTypeExpressionInput {
+  eq: WebhookTargetEventFilterTypeInput
+  in: [WebhookTargetEventFilterTypeInput]
+}
+
+input WebhookTargetFilterInput {
+  and: [WebhookTargetFilterInput]
+  contentMode: WebhookTargetCloudEventContentModeInput
+  enabled: BoolFilterExpressionInput
+  eventFilterType: WebhookTargetEventFilterTypeExpressionInput
+  name: StringFilterExpressionInput
+  not: [WebhookTargetFilterInput]
+  or: [WebhookTargetFilterInput]
+  targetId: IDFilterExpressionInput
+  targetType: WebhookTargetTargetTypeExpressionInput
+  userId: IDFilterExpressionInput
+}
+
+input WebhookTargetHTTPTargetGranularInput {
+  auth: WebhookTargetAuthInput
+  hmac256: StringArrayUpdateInput
+  method: HTTPMethodWrapperInput
+  targetUri: String
+}
+
+input WebhookTargetHTTPTargetInput {
+  auth: WebhookTargetAuthInput
+  hmac256: HMAC256Input
+  method: HTTPMethodInput
+  targetUri: String
+}
+
+input WebhookTargetHTTPTargetUpdateInput {
+  granular: WebhookTargetHTTPTargetGranularInput
+  replace: WebhookTargetHTTPTargetInput
+}
+
+input WebhookTargetJsonExpressionFilterInput {
+  jsonPathExpression: String
+}
+
+input WebhookTargetTargetTypeExpressionInput {
+  eq: WebhookTargetTargetTypeInput
+  in: [WebhookTargetTargetTypeInput]
+}
+
+input WebhookTargetTimeseriesFilterInput {
+  points: [String]
+}
+
+input WebhookTargetUpdateInput {
+  batchedContentModeConfig: WebhookTargetCloudEventBatchedContentModeConfigInput
+  contentMode: WebhookTargetCloudEventContentModeWrapperInput
+  enabled: Boolean
+  eventFilters: WebhookTargetEventFilterInput
+  httpTarget: WebhookTargetHTTPTargetUpdateInput
+  id: String
+  maxRetry: Long
+  metadata: MetadataUpdateInput
+  name: String
+}
+
+input WebhookTargetUpdateRequestInput {
+  target: WebhookTargetUpdateInput
+}
+
+input ZoneFilter {
+  and: [ZoneFilter]
+  dateCreated: TimestampFilterExpressionInput
+  dateUpdated: TimestampFilterExpressionInput
+  id: IDFilterExpressionInput
+  name: StringFilterExpressionInput
+  not: ZoneFilter
+  or: [ZoneFilter]
+}

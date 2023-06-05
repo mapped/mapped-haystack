@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mapped-haystack"
+version = "0.1.0"
+description = ""
+authors = ["Jason Koh <jason@mapped.com>"]
+readme = "README.md"
+packages = [{include = "mapped_haystack"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+shaystack = {git = "https://github.com/engie-group/shaystack.git"}
+jsonschema = "^4.17.3"
+python-dotenv = "^1.0.0"
+pandas = "^2.0.2"
+requests = "^2.31.0"
+gql = {extras = ["all"], version = "^3.4.1"}
+flask = "^2.3.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+pytest-asyncio = "^0.21.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
