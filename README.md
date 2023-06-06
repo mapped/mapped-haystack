@@ -11,7 +11,12 @@ This is a Python [poetry](https://python-poetry.org/) project.
 `poetry install` to install dependencies.
 
 ## How to Run?
-`flask --app mapped_haystack.server run`
+1. Create an account at [Mapped](app.mapped.com/signup)
+2. Go to [the developer portal](https://developer.mapped.com/docs/introduction) and create a PAT [here](https://developer.mapped.com/tools/personal-access-token)
+3. Create `.env` by copying it from `.env.example`.
+4. Update `PAT` value with the one generated at 2.
+5. Run `flask --app mapped_haystack.server run`
+
 
 ## Available Endpoint
 
