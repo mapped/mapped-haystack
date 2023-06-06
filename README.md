@@ -2,7 +2,7 @@
 Mapped Haystack
 ===============
 
-Mapepd Haystack is a Haystack HTTP endpoint using Mapped GraphQL API as a data source. This is currently an alpha version and will be actively updated in the next few weeks.
+Mapepd Haystack is a Haystack HTTP endpoint using Mapped GraphQL API as a data source. This is currently an alpha version and will be actively updated in the next few weeks. Consider this is v0.0.1.
 
 
 ## How to Install?
