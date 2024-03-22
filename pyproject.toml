@@ -13,7 +13,7 @@ jsonschema = "^4.17.3"
 python-dotenv = "^1.0.0"
 pandas = "^2.0.2"
 requests = "^2.31.0"
-gql = {extras = ["all"], version = "^3.4.1"}
+gql = {extras = ["all"], version = "^3"}
 flask = "^2.3.2"
 
 
