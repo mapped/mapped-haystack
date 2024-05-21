@@ -12,7 +12,7 @@ shaystack = {git = "https://github.com/engie-group/shaystack.git"}
 jsonschema = "^4.17.3"
 python-dotenv = "^1.0.0"
 pandas = "^2.0.2"
-requests = "^2.31.0"
+requests = "^2.32.0"
 gql = {extras = ["all"], version = "^3"}
 flask = "^2.3.2"
 
